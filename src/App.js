@@ -1,6 +1,7 @@
-import LoginPage from './components/LoginPage';
+import {LoginPage} from './components/LoginPage';
 import {createGlobalStyle} from 'styled-components';
-
+import {BrowserRouter, Routes, Route, Link} from 'react-router-dom';
+import {SignUpPage} from "./components/SignUpPage";
 
 const GlobalStyle = createGlobalStyle`
     :root {
@@ -19,11 +20,14 @@ const GlobalStyle = createGlobalStyle`
 
 
 function App() {
-    return (<>
-            <GlobalStyle/>
-            <LoginPage/>
-        </>
-    )
+    return <BrowserRouter>
+        <GlobalStyle/>
+        <Routes>
+            <Route path="/" element={<LoginPage/>}/>
+            <Route path="/login" element={<LoginPage/>}/>
+            <Route path="/signup" element={<SignUpPage/>}/>
+        </Routes>
+    </BrowserRouter>
 }
 
 export default App;

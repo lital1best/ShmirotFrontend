@@ -2,6 +2,7 @@ import {LoginPage} from './components/LoginPage';
 import {createGlobalStyle} from 'styled-components';
 import {BrowserRouter, Routes, Route, Link} from 'react-router-dom';
 import {SignUpPage} from "./components/SignUpPage";
+import {PasswordSetupPage} from "./components/PasswordSetupPage";
 
 const GlobalStyle = createGlobalStyle`
     :root {
@@ -26,6 +27,7 @@ function App() {
             <Route path="/" element={<LoginPage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/signup" element={<SignUpPage/>}/>
+            <Route path="/signup/password" element={<PasswordSetupPage/>}/>
         </Routes>
     </BrowserRouter>
 }

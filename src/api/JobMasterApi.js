@@ -1,4 +1,9 @@
 import axios from "axios";
-const baseUrl = 'http://localhost:5038/api/JobMasters';
+export const jobMastersBaseUrl = 'http://localhost:5038/api/JobMasters';
 
-export const CreateJobMasterApi = (createJobMasterContract) => axios.post(baseUrl, createJobMasterContract);
+export const CreateJobMasterApi = (createJobMasterContract) => axios.post(jobMastersBaseUrl, createJobMasterContract, {headers: {
+        'accept': 'text/plain',
+        'Content-Type': 'application/json'
+    }});
+
+export const GetJobMastersApi = () => axios.get(jobMastersBaseUrl);

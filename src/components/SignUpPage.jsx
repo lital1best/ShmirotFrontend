@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {
     Actions,
     BeforeLinkText,
@@ -31,6 +31,8 @@ const options = {revalidateOnFocus: false, revalidateOnReconnect: false};
 
 export function SignUpPage() {
     const navigate = useNavigate();
+    const {state} = useLocation();
+
     const [form, setForm] = useState({
         personalNumber: '',
         firstName: '',
@@ -41,11 +43,22 @@ export function SignUpPage() {
         jobMasterPersonalNumber: '',
     });
 
-    const {data: jobMasters} = useSWR(jobMastersBaseUrl, fetcher, options);
+    const {data: jobMasters, mutate} = useSWR(jobMastersBaseUrl, fetcher, options);
 
+    useEffect(() => {
+            if (!!state?.account) {
+                setForm(state.account)
+            }
+        }, [state?.account, navigate]
+    )
 
     const onChange = (e) => {
         const {name, value, type, checked} = e.target;
+
+        if (name === 'unit') {
+            mutate().then()
+        }
+
         setForm((f) => ({...f, [name]: type === 'checkbox' ? checked : value}));
     };
 
@@ -69,19 +82,7 @@ export function SignUpPage() {
             return;
         }
 
-        const account = {
-            personalNumber: String(form.personalNumber || '').trim(),
-            firstName: String(form.firstName || '').trim(),
-            lastName: String(form.lastName || '').trim(),
-            rank: String(form.rank || '').trim(),
-            unit: String(form.unit || '').trim(),
-            role: form.role,
-            jobMasterPersonalNumber: form.role === 'soldier'
-                ? String(form.jobMasterPersonalNumber || '').trim()
-                : undefined,
-        };
-
-        navigate('/signup/password', {state: {account}});
+        navigate('/signup/password', {state: {account: form}});
     };
 
     return (
@@ -103,7 +104,7 @@ export function SignUpPage() {
                             <Input
                                 id="personalNumber"
                                 name="personalNumber"
-                                type="text"
+                                type="number"
                                 placeholder="Enter Personal Number"
                                 value={form.personalNumber}
                                 onChange={onChange}

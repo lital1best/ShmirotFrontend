@@ -1,6 +1,6 @@
-import {CreateJobMasterContract} from "./CreateJobMasterContract";
+import {JobMasterContract} from "./JobMasterContract";
 
-export class CreateSoldierContract extends CreateJobMasterContract {
+export class SoldierContract extends JobMasterContract {
     constructor(personalNumber, firstName, lastName, unit, rank, jobMasterPersonalNumber) {
         // Call the constructor of the parent class
         super(personalNumber, firstName, lastName, unit, rank);

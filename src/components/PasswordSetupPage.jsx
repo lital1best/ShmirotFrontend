@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {
     Actions,
     BeforeLinkText,
@@ -22,15 +22,19 @@ import {
 } from "./CommonStyles";
 import {CreateJobMasterApi} from "../api/JobMasterApi";
 import {options} from "axios";
+import {CreateSoldierApi} from "../api/SoldiersApi";
+import {JobMasterContract} from "../entities/contracts/JobMasterContract";
+import {SoldierContract} from "../entities/contracts/SoldierContract";
+
 export function PasswordSetupPage() {
     const navigate = useNavigate();
-    const { state } = useLocation();
+    const {state} = useLocation();
     const account = state?.account;
 
 
     useEffect(() => {
         if (!account) {
-            navigate('/signup', { replace: true });
+            navigate('/signup', {replace: true});
         }
     }, [account, navigate]);
 
@@ -40,8 +44,8 @@ export function PasswordSetupPage() {
     });
 
     const onChange = (e) => {
-        const { name, value } = e.target;
-        setForm((f) => ({ ...f, [name]: value }));
+        const {name, value} = e.target;
+        setForm((f) => ({...f, [name]: value}));
     };
 
     const onSubmit = (e) => {
@@ -61,7 +65,13 @@ export function PasswordSetupPage() {
             return;
         }
 
-        CreateJobMasterApi(account).catch(err => console.log(err)).then()
+        if (account.role === 'jobMaster') {
+            const jobMaster = new JobMasterContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank)
+            CreateJobMasterApi(jobMaster).catch(err => console.log(err)).then()
+        } else {
+            const soldier = new SoldierContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank, account.jobMasterPersonalNumber)
+            CreateSoldierApi(soldier).catch(err => console.log(err)).then()
+        }
     };
 
     return (
@@ -111,7 +121,8 @@ export function PasswordSetupPage() {
                     </Field>
 
                     <Actions>
-                        <Button type="button" onClick={() => navigate('/signup',  {state: {account: account}})}>Back</Button>
+                        <Button type="button"
+                                onClick={() => navigate('/signup', {state: {account: account}})}>Back</Button>
                         <Button type="submit">Create Account</Button>
                     </Actions>
                 </Form>

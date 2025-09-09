@@ -1,16 +1,17 @@
 import styled from "styled-components";
 
-export const Screen = styled.div`
-    min-height: 100%;
-    display: grid;
-    place-items: center;
-    padding: 32px 16px;
+export const DialogWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 `;
+
 export const Card = styled.div`
     width: 100%;
     max-width: 440px;
-    background: linear-gradient(180deg, rgba(17, 24, 17, 0.9), rgba(17, 24, 17, 0.85));
-    border: 1px solid rgba(199, 211, 111, 0.25);
+    background: linear-gradient(180deg, var(--black-80), var(--black-60));
+    border: 1px solid var(--accent);
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04);
@@ -22,7 +23,7 @@ export const Header = styled.div`
     align-items: center;
     gap: 12px;
     padding: 20px 20px 10px 20px;
-    border-bottom: 1px solid rgba(199, 211, 111, 0.18);
+    border-bottom: 1px solid var(--accent);
     background: linear-gradient(180deg, rgba(199, 211, 111, 0.08), rgba(199, 211, 111, 0.02));
 `;
 export const Emblem = styled.img.attrs({
@@ -33,7 +34,7 @@ export const Emblem = styled.img.attrs({
     height: 40px;
     border-radius: 8px;
     object-fit: cover;
-    border: 2px solid rgba(199, 211, 111, 0.25);
+    border: 2px solid var(--accent);
 `;
 export const TitleWrap = styled.div`
     display: flex;
@@ -42,15 +43,16 @@ export const TitleWrap = styled.div`
 `;
 export const Title = styled.h1`
     margin: 0;
-    font-size: 20px;
+    font-size: 24px;
     letter-spacing: 0.5px;
-    color: #e9f0d8;
+    color: var(--accent-2);
 `;
 export const Subtitle = styled.div`
-    font-size: 12px;
-    color: #b7c28c;
-    opacity: 0.9;
+    margin: 0;
+    color: var(--sand);
+    opacity: 0.85;
 `;
+
 export const Form = styled.form`
     padding: 18px 20px 22px 20px;
     display: flex;
@@ -66,7 +68,7 @@ export const Label = styled.label`
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: #c9d59b;
+    color: var(--accent);
 `;
 export const InputWrap = styled.div`
     position: relative;
@@ -76,15 +78,15 @@ export const Input = styled.input`
     padding: 12px 12px 12px 42px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(199, 211, 111, 0.25);
-    color: #f2f4ef;
+    border: 1px solid var(--accent);
+    color: var(--accent-2);
     outline: none;
     transition: 140ms ease;
     font-size: 14px;
 
     &:focus {
-        border-color: rgba(199, 211, 111, 0.8);
-        box-shadow: 0 0 0 3px rgba(199, 211, 111, 0.14);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent);
         background: rgba(255, 255, 255, 0.06);
     }
 
@@ -109,30 +111,32 @@ export const Actions = styled.div`
     margin-top: 6px;
 `;
 export const Button = styled.button`
+    appearance: none;
+    border: 1px solid ${({ $active }) => ($active ? 'var(--accent)' : 'var(--army-green-dark)')};
+    background: ${({ $active }) => ($active ? 'var(--army-green-dark)' : 'transparent')};
+    color: ${({ $active }) => ($active ? 'var(--accent-2)' : 'var(--sand)')};
+    padding: 10px 14px;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(199, 211, 111, 0.35);
-    background: linear-gradient(180deg, #3b5d3a, #2f4a2e);
-    color: #f2f4ef;
     font-weight: 700;
-    letter-spacing: 0.4px;
-    min-width: 120px;
-    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+    letter-spacing: 0.2px;
+    transition: all 0.15s ease;
+    outline: none;
 
     &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-        filter: brightness(1.05);
+        background: var(--army-green-dark);
+        border-color: var(--olive);
+        color: var(--accent-2);
     }
 
-    &:active {
-        transform: translateY(0);
+    &:focus-visible {
+        box-shadow: 0 0 0 3px rgba(199, 211, 111, 0.35);
     }
 `;
 
+
 export const Link = styled.a`
-    color: #c7d36f;
+    color: var(--accent);
     text-decoration: none;
     margin-left: 8px;
     font-weight: 500;
@@ -145,10 +149,10 @@ export const Link = styled.a`
 export const LinkWrap = styled.div`
     text-align: center;
     padding: 16px;
-    border-top: 1px solid rgba(199, 211, 111, 0.18);
+    border-top: 1px solid var(--accent);
 `;
 
 export const BeforeLinkText = styled.span`
-    color: #dfe8c4;
+    color: var(--accent-2);
     font-size: 14px;
 `;

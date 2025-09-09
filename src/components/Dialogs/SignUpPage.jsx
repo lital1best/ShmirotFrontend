@@ -16,13 +16,13 @@ import {
     Label,
     Link,
     LinkWrap,
-    Screen,
+    DialogWrapper,
     Subtitle,
     Title,
     TitleWrap
-} from "./CommonStyles";
+} from "../CommonStyles";
 import useSWR from "swr";
-import {jobMastersBaseUrl} from "../api/JobMasterApi";
+import {jobMastersBaseUrl} from "../../api/JobMasterApi";
 import axios from "axios";
 import {JobMasterSelect} from "./JobMasterSelect";
 
@@ -39,7 +39,7 @@ export function SignUpPage() {
         lastName: '',
         rank: '',
         unit: '',
-        role: 'jobMaster', // add back account type: 'jobMaster' | 'soldier'
+        role: 'jobMaster',
         jobMasterPersonalNumber: '',
     });
 
@@ -86,7 +86,7 @@ export function SignUpPage() {
     };
 
     return (
-        <Screen>
+        <DialogWrapper>
             <Card>
                 <Header>
                     <Emblem/>
@@ -235,7 +235,7 @@ export function SignUpPage() {
                     </BeforeLinkText>
                 </LinkWrap>
             </Card>
-        </Screen>
+        </DialogWrapper>
     );
 }
 

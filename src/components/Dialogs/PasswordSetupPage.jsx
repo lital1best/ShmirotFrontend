@@ -15,16 +15,16 @@ import {
     Label,
     Link,
     LinkWrap,
-    Screen,
+    DialogWrapper,
     Subtitle,
     Title,
     TitleWrap
-} from "./CommonStyles";
-import {CreateJobMasterApi} from "../api/JobMasterApi";
+} from "../CommonStyles";
+import {CreateJobMasterApi} from "../../api/JobMasterApi";
 import {options} from "axios";
-import {CreateSoldierApi} from "../api/SoldiersApi";
-import {JobMasterContract} from "../entities/contracts/JobMasterContract";
-import {SoldierContract} from "../entities/contracts/SoldierContract";
+import {CreateSoldierApi} from "../../api/SoldiersApi";
+import {JobMasterContract} from "../../entities/contracts/JobMasterContract";
+import {SoldierContract} from "../../entities/contracts/SoldierContract";
 
 export function PasswordSetupPage() {
     const navigate = useNavigate();
@@ -75,7 +75,7 @@ export function PasswordSetupPage() {
     };
 
     return (
-        <Screen>
+        <DialogWrapper>
             <Card>
                 <Header>
                     <Emblem/>
@@ -134,6 +134,6 @@ export function PasswordSetupPage() {
                     </BeforeLinkText>
                 </LinkWrap>
             </Card>
-        </Screen>
+        </DialogWrapper>
     );
 }

@@ -1,8 +1,9 @@
-import {LoginPage} from './components/LoginPage';
+import {LoginPage} from './components/Dialogs/LoginPage';
 import {createGlobalStyle} from 'styled-components';
 import {BrowserRouter, Routes, Route, Link} from 'react-router-dom';
-import {SignUpPage} from "./components/SignUpPage";
-import {PasswordSetupPage} from "./components/PasswordSetupPage";
+import {SignUpPage} from "./components/Dialogs/SignUpPage";
+import {PasswordSetupPage} from "./components/Dialogs/PasswordSetupPage";
+import HomePage from "./components/HomePageWithTabs";
 
 const GlobalStyle = createGlobalStyle`
     :root {
@@ -24,7 +25,7 @@ function App() {
     return <BrowserRouter>
         <GlobalStyle/>
         <Routes>
-            <Route path="/" element={<LoginPage/>}/>
+            <Route path="/" element={<HomePage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/signup" element={<SignUpPage/>}/>
             <Route path="/signup/password" element={<PasswordSetupPage/>}/>

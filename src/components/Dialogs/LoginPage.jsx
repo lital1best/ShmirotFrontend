@@ -2,8 +2,8 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {
     Actions, Button, Card, Emblem, Field, Form, Header,
-    Icon, Input, InputWrap, Label, Screen, Subtitle, Title, TitleWrap, Link, LinkWrap, BeforeLinkText
-} from "./CommonStyles";
+    Icon, Input, InputWrap, Label, DialogWrapper, Subtitle, Title, TitleWrap, Link, LinkWrap, BeforeLinkText
+} from "../CommonStyles";
 
 
 export function LoginPage() {
@@ -31,7 +31,7 @@ export function LoginPage() {
     };
 
     return (
-        <Screen>
+        <DialogWrapper>
             <Card>
                 <Header>
                     <Emblem/>
@@ -85,7 +85,7 @@ export function LoginPage() {
                     </BeforeLinkText>
                 </LinkWrap>
             </Card>
-        </Screen>
+        </DialogWrapper>
     );
 }
 

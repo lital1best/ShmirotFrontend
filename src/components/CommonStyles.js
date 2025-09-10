@@ -156,3 +156,84 @@ export const BeforeLinkText = styled.span`
     color: var(--accent-2);
     font-size: 14px;
 `;
+
+
+export const Dropdown = styled.div`
+    position: relative;
+    width: 100%;
+`;
+
+export const DropdownButton = styled.button`
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 38px 12px 44px; /* left padding clears the icon in InputWrap */
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgba(195, 213, 75, 0.5);
+    }
+`;
+
+export const Placeholder = styled.span`
+    color: rgba(255, 255, 255, 0.6);
+`;
+
+export const Caret = styled.span`
+    margin-left: 8px;
+    opacity: 0.8;
+`;
+
+export const DropdownMenu = styled.div`
+    position: absolute;
+    left: 0;
+    right: 0;
+
+    top: ${({$openUp}) => ($openUp ? 'auto' : 'calc(80% + 6px)')};
+    bottom: ${({$openUp}) => ($openUp ? 'calc(80% + 6px)' : 'auto')};
+    max-height: 120px;
+    overflow: auto;
+    padding: 6px;
+    border-radius: 12px;
+    background: rgba(20, 25, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+`;
+
+export const DropdownItem = styled.div`
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+`;
+
+export const EmptyItem = styled.div`
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+`;
+
+export const ItemName = styled.div`
+    font-weight: 600;
+    line-height: 1.1;
+`;
+
+export const ItemMeta = styled.div`
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+    line-height: 1.1;
+`;

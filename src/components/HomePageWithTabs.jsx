@@ -54,7 +54,7 @@ export default function HomePage() {
           aria-labelledby="tab-monthly-btn"
           hidden={activeTab !== 'monthly'}
         >
-          <SectionTitle>Monthly Jobs</SectionTitle>
+          <SectionTitle>Monthly Shmirot</SectionTitle>
           <Placeholder>
               <MonthlyJobsPage/>
           </Placeholder>

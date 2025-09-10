@@ -1,8 +1,13 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
+import {AddJobDialog} from "../../Dialogs/AddJobDialog";
 
 export default function MonthlyJobsPage() {
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
+
+
     const [currentMonth, setCurrentMonth] = useState(() => {
         const d = new Date();
         return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -32,9 +37,10 @@ export default function MonthlyJobsPage() {
     };
 
     const startAddFor = (dateKey) => {
-        setEditingDateKey(dateKey);
-        setNewJobText("");
+        setSelectedDate(dateKey);
+        setShowAddDialog(true);
     };
+
 
     const submitJob = (e) => {
         e.preventDefault();
@@ -56,85 +62,73 @@ export default function MonthlyJobsPage() {
         });
     };
 
-    return (
-        <CalendarContainer>
-            <CalendarHeader>
-                <HeaderLeft>
-                    <HeaderTitle>{monthLabel}</HeaderTitle>
-                    <HeaderSub>Assign and review monthly jobs</HeaderSub>
-                </HeaderLeft>
-                <HeaderActions>
-                    <Button onClick={onPrev}>◀</Button>
-                    <Button onClick={onToday}>Today</Button>
-                    <Button onClick={onNext}>▶</Button>
-                </HeaderActions>
-            </CalendarHeader>
+    const onDialogClose = () => {
+        setShowAddDialog(false);
+        setSelectedDate(null);
+    };
 
-            <Weekdays>
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                    <Weekday key={d}>{d}</Weekday>
-                ))}
-            </Weekdays>
+    return <CalendarContainer>
+                <CalendarHeader>
+                    <HeaderLeft>
+                        <HeaderTitle>{monthLabel}</HeaderTitle>
+                        <HeaderSub>Assign and review monthly shmirot</HeaderSub>
+                    </HeaderLeft>
+                    <HeaderActions>
+                        <Button onClick={onPrev}>◀</Button>
+                        <Button onClick={onToday}>Today</Button>
+                        <Button onClick={onNext}>▶</Button>
+                    </HeaderActions>
+                </CalendarHeader>
 
-            <DayGrid role="grid" >
-                {Array.from({length: leadingBlanks}).map((_, i) => (
-                    <EmptyCell key={`lead-${i}`} aria-hidden="true"/>
-                ))}
-                {monthDays.map((day) => {
-                    const key = day.date.toString();
-                    const jobs = jobsByDate[key] || [];
-                    const isEditing = editingDateKey === key;
-                    return (
-                        <DayCell
-                            key={key}
-                            aria-selected={isEditing}
-                            $today={day.isToday}
-                        >
-                            <DayHeader>
-                                <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
-                                <SmallAction
-                                    type="button"
-                                    onClick={() => startAddFor(key)}
-                                >
-                                    + Add Job
-                                </SmallAction>
-                            </DayHeader>
+                <Weekdays>
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                        <Weekday key={d}>{d}</Weekday>
+                    ))}
+                </Weekdays>
 
-                            <JobsList>
-                                {jobs.map((j) => (
-                                    <JobPill key={j.id}>
-                                        <span>{j.text}</span>
-                                        <RemoveBtn
-                                            type="button"
-                                            onClick={() => removeJob(key, j.id)}
-                                            title="Remove"
-                                        >
-                                            ×
-                                        </RemoveBtn>
-                                    </JobPill>
-                                ))}
-                            </JobsList>
+                <DayGrid role="grid">
+                    {Array.from({length: leadingBlanks}).map((_, i) => (
+                        <EmptyCell key={`lead-${i}`} aria-hidden="true"/>
+                    ))}
+                    {monthDays.map((day) => {
+                        const key = day.date.toISOString().slice(0, 10);
+                        const jobs = jobsByDate[key] || [];
+                        return (
+                            <DayCell
+                                key={key}
+                                $today={day.isToday}
+                            >
+                                <DayHeader>
+                                    <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
+                                    <SmallAction
+                                        type="button"
+                                        onClick={() => startAddFor(key)}
+                                    >
+                                        + Add Job
+                                    </SmallAction>
+                                </DayHeader>
 
-                            {isEditing && (
-                                <AddForm onSubmit={submitJob}>
-                                    <AddInput
-                                        autoFocus
-                                        value={newJobText}
-                                        onChange={(e) => setNewJobText(e.target.value)}
-                                        placeholder="Job description…"
-                                    />
-                                    <AddButton type="submit">Add</AddButton>
-                                </AddForm>
-                            )}
-                        </DayCell>
-                    );
-                })}
-                {Array.from({length: trailingBlanks}).map((_, i) => (
-                    <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
-                ))}
-            </DayGrid>
-        </CalendarContainer>
-    );
+                                <JobsList>
+                                    {jobs.map((j) => (
+                                        <JobPill key={j.id}>
+                                            <span>{j.text}</span>
+                                            <RemoveBtn
+                                                type="button"
+                                                onClick={() => removeJob(key, j.id)}>
+                                                ×
+                                            </RemoveBtn>
+                                        </JobPill>
+                                    ))}
+                                </JobsList>
+                            </DayCell>
+                        );
+                    })}
+                    {Array.from({length: trailingBlanks}).map((_, i) => (
+                        <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
+                    ))}
+                </DayGrid>
+                <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>
+            </CalendarContainer>
 }
 
 function buildMonthView(monthDate) {
@@ -162,143 +156,144 @@ function isSameDate(a, b) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+
 const CalendarContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 `;
 
 const CalendarHeader = styled.header`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--army-green-dark);
-  border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--army-green-dark);
+    border-radius: 10px;
 `;
 
 const HeaderLeft = styled.div`
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 `;
 
 const HeaderTitle = styled.h3`
-  margin: 0;
-  font-size: 20px;
-  color: var(--accent-2);
+    margin: 0;
+    font-size: 20px;
+    color: var(--accent-2);
 `;
 
 const HeaderSub = styled.span`
-  color: var(--sand);
-  font-size: 12px;
-  opacity: 0.9;
+    color: var(--sand);
+    font-size: 12px;
+    opacity: 0.9;
 `;
 
 const HeaderActions = styled.div`
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 `;
 
 const Weekdays = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  padding: 0 2px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 0 2px;
 `;
 
 const Weekday = styled.div`
-  text-align: center;
-  color: var(--sand);
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  padding: 6px 0;
+    text-align: center;
+    color: var(--sand);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 6px 0;
 `;
 
 const DayGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(120px, 1fr);
-  gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(120px, 1fr);
+    gap: 8px;
 `;
 
 const DayCell = styled.div`
-  display: flex;
-  flex-direction: column;
-  background: rgba(168, 159, 123, 0.08);
-  border: 1px solid var(--army-green-dark);
-  border-radius: 10px;
-  padding: 10px;
-  min-height: 120px;
-  outline: none;
-  position: relative;
+    display: flex;
+    flex-direction: column;
+    background: rgba(168, 159, 123, 0.08);
+    border: 1px solid var(--army-green-dark);
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 120px;
+    outline: none;
+    position: relative;
 
-  ${(p) =>
-    p.$today &&
-    `
+    ${(p) =>
+            p.$today &&
+            `
     box-shadow: 0 0 0 2px var(--accent) inset;
     border-color: var(--accent);
   `}
 `;
 
 const EmptyCell = styled.div`
-  border-radius: 10px;
-  min-height: 120px;
+    border-radius: 10px;
+    min-height: 120px;
 `;
 
 const DayHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
 `;
 
 const DayNumber = styled.div`
-  font-weight: 800;
-  color: var(--accent-2);
+    font-weight: 800;
+    color: var(--accent-2);
 `;
 
 const SmallAction = styled.button`
-  appearance: none;
-  border: 1px solid var(--army-green-dark);
-  background: transparent;
-  color: var(--sand);
-  padding: 4px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.15s ease;
+    appearance: none;
+    border: 1px solid var(--army-green-dark);
+    background: transparent;
+    color: var(--sand);
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s ease;
 
-  &:hover {
-    background: var(--army-green-dark);
-    color: var(--accent-2);
-    border-color: var(--olive);
-  }
+    &:hover {
+        background: var(--army-green-dark);
+        color: var(--accent-2);
+        border-color: var(--olive);
+    }
 
-  &:focus-visible {
-    box-shadow: 0 0 0 3px rgba(199, 211, 111, 0.35);
-    outline: none;
-  }
+    &:focus-visible {
+        box-shadow: 0 0 0 3px rgba(199, 211, 111, 0.35);
+        outline: none;
+    }
 `;
 
 const JobsList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 `;
 
 const JobPill = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.2);
-  color: var(--accent-2);
-  border: 1px solid var(--army-green-dark);
-  border-radius: 999px;
-  font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--accent-2);
+    border: 1px solid var(--army-green-dark);
+    border-radius: 999px;
+    font-size: 12px;
 `;
 
 const RemoveBtn = styled.button`
@@ -313,40 +308,4 @@ const RemoveBtn = styled.button`
     &:hover {
         color: var(--accent);
     }
-`;
-
-const AddForm = styled.form`
-  display: flex;
-  gap: 6px;
-  margin-top: auto; /* push to bottom */
-  padding-top: 8px;
-  border-top: 1px dashed var(--army-green-dark);
-`;
-
-const AddInput = styled.input`
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--army-green-dark);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--accent-2);
-  outline: none;
-  font-size: 13px;
-  transition: 140ms ease;
-
-  &:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(199, 211, 111, 0.25);
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  &::placeholder {
-    color: rgba(240, 246, 220, 0.5);
-  }
-`;
-
-const AddButton = styled(Button)`
-  padding: 8px 10px;
-  font-weight: 700;
 `;

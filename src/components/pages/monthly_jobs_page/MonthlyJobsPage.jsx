@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
-import {AddJobDialog} from "../../Dialogs/AddJobDialog";
+import {JobDialog} from "../../Dialogs/JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {jobMasterJobsForMonthUrl} from "../../../api/JobMasterApi";
@@ -20,14 +20,12 @@ export default function MonthlyJobsPage() {
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
 
-
     const getMonthJobsUrlFunction = isJobMaster ? jobMasterJobsForMonthUrl : soldiersJobsForMonthUrl
+    const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
     const {
         data: jobs,
         mutate
-    } = useSWR(getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear()));
-
-    const [newJobText, setNewJobText] = useState("");
+    } = useSWR(swrKey);
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
@@ -52,10 +50,11 @@ export default function MonthlyJobsPage() {
 
 
     const onDialogClose = () => {
-        mutate().then()
-        setShowAddDialog(false);
-        setSelectedJob(null);
-        setSelectedDate(null);
+        mutate(swrKey).then(() => {
+            setShowAddDialog(false);
+            setSelectedJob(null);
+            setSelectedDate(null);
+        })
     };
 
     return <CalendarContainer>
@@ -78,12 +77,12 @@ export default function MonthlyJobsPage() {
         </Weekdays>
 
         <DayGrid role="grid">
-            {Array.from({length: leadingBlanks}).map((_, i) => (
+            {Array.from({length: leadingBlanks})?.map((_, i) => (
                 <EmptyCell key={`lead-${i}`}/>
             ))}
-            {monthDays.map((day) => {
+            {monthDays?.map((day) => {
                 const key = day.date.toISOString().slice(0, 10);
-                const jobsThisDay = jobs?.filter(j => j.date === key) || [];
+                const jobsThisDay = Array.isArray(jobs)? jobs?.filter(j => j.date === key) : [];
 
                 return (
                     <DayCell
@@ -124,11 +123,11 @@ export default function MonthlyJobsPage() {
                     </DayCell>
                 );
             })}
-            {Array.from({length: trailingBlanks}).map((_, i) => (
+            {Array.from({length: trailingBlanks})?.map((_, i) => (
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        {isJobMaster && <AddJobDialog isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>}
+        {isJobMaster && <JobDialog isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>}
     </CalendarContainer>
 }
 

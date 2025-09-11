@@ -2,12 +2,12 @@ import {Actions, Button, Card, Field, Form, Input, Label} from "../CommonStyles"
 import React, {useEffect, useState} from "react";
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select} from "@mui/material";
 import Modal from '@mui/material/Modal';
-import {createJob, editJob} from "../../api/JobsApi";
+import {createJob, deleteJob, editJob} from "../../api/JobsApi";
 import {ExemptionsOptions, ServiceStatus} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
 
 
-export function AddJobDialog({isOpen, onClose, selectedDate, selectedJob}) {
+export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
     const [jobForm, setJobForm] = useState( {
         description: '',
         location: '',
@@ -39,17 +39,15 @@ export function AddJobDialog({isOpen, onClose, selectedDate, selectedJob}) {
         e.preventDefault();
 
         if (selectedJob){
-            editJob(jobForm, selectedJob.id).then()
+            editJob(jobForm, selectedJob.id).then(handleCloseDialog)
         }
         else{
             createJob({
                 ...jobForm,
                 date: selectedDate,
                 jobMasterPersonalNumber: user.personalNumber,
-            }).then()
+            }).then(handleCloseDialog)
         }
-
-        handleCloseDialog();
     };
 
     return <Modal
@@ -127,6 +125,12 @@ export function AddJobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                 </FormControl>
                 <Actions>
                     <Button type="button" onClick={handleCloseDialog}>Cancel</Button>
+                    {
+                        !!selectedJob &&
+                        <Button color={'red'} type="button" onClick={() => {
+                            deleteJob(selectedJob.id).then(handleCloseDialog)
+                        }}>Delete job</Button>
+                    }
                     <Button type="submit" $active>{!!selectedJob? "Edit job": "Add a new job"}</Button>
                 </Actions>
             </Form>

@@ -9,3 +9,5 @@ export const createJob = (job) => axios.post(jobsBaseUrl, job, {headers: {
     }})
 
 export const editJob = (job, jobId) => axios.put(`${jobsBaseUrl}/${jobId}`, job)
+
+export const deleteJob = (jobId) => axios.delete(`${jobsBaseUrl}/${jobId}`)

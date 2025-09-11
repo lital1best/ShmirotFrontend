@@ -25,10 +25,13 @@ import {options} from "axios";
 import {CreateSoldierApi} from "../../api/SoldiersApi";
 import {JobMasterContract} from "../../entities/contracts/JobMasterContract";
 import {SoldierContract} from "../../entities/contracts/SoldierContract";
+import {UserContext, useUser} from "../../userContext";
 
-export function PasswordSetupPage({login}) {
+export function PasswordSetupPage() {
     const navigate = useNavigate();
     const {state} = useLocation();
+    const {login} = useUser(UserContext);
+
     const account = state?.account;
 
 

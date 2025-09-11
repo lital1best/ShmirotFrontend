@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Actions,
     BeforeLinkText,
@@ -22,15 +22,23 @@ import {
 import {GetJobMasterByPersonalNumber} from "../../api/JobMasterApi";
 import {GetSoldierByPersonalNumber} from "../../api/SoldiersApi";
 import {useNavigate} from "react-router-dom";
+import {useUser} from "../../userContext";
 
 
-export function LoginPage({login}) {
+export function LoginPage() {
     const [form, setForm] = useState({
         personalNumber: '',
         password: ''
     });
 
     const navigate = useNavigate()
+    const {user, login} = useUser();
+
+    useEffect(() => {
+        if (!!user) {
+            navigate('/');
+        }
+    }, [!!user]);
 
     const onChange = (e) => {
         const {name, value, type, checked} = e.target;

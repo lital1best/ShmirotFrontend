@@ -2,11 +2,12 @@ import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
 import {AddJobDialog} from "../../Dialogs/AddJobDialog";
+import {useUser} from "../../../userContext";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
-
+    const {isJobMaster} = useUser()
 
     const [currentMonth, setCurrentMonth] = useState(() => {
         const d = new Date();
@@ -100,12 +101,14 @@ export default function MonthlyJobsPage() {
                             >
                                 <DayHeader>
                                     <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
-                                    <SmallAction
-                                        type="button"
-                                        onClick={() => startAddFor(key)}
-                                    >
-                                        + Add Job
-                                    </SmallAction>
+                                    { isJobMaster &&
+                                        <SmallAction
+                                            type="button"
+                                            onClick={() => startAddFor(key)}
+                                        >
+                                            + Add Job
+                                        </SmallAction>
+                                    }
                                 </DayHeader>
 
                                 <JobsList>
@@ -127,7 +130,7 @@ export default function MonthlyJobsPage() {
                         <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
                     ))}
                 </DayGrid>
-                <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>
+                {isJobMaster && <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>}
             </CalendarContainer>
 }
 

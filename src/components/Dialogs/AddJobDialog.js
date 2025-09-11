@@ -4,6 +4,7 @@ import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select} from 
 import Modal from '@mui/material/Modal';
 import {createJob} from "../../api/JobsApi";
 import {ExemptionsOptions, ServiceStatus} from "../../consts";
+import {UserContext, useUser} from "../../userContext";
 
 
 export function AddJobDialog({isOpen, onClose, selectedDate}) {
@@ -14,6 +15,8 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
         exemptions: [],
         score: 0,
     });
+
+    const {user} = useUser(UserContext);
 
     const handleCloseDialog = () => {
         onClose();
@@ -33,7 +36,7 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
         createJob({
             ...jobForm,
             date: selectedDate,
-            jobMasterPersonalNumber: 1,
+            jobMasterPersonalNumber: user.personalNumber,
         }).then()
         handleCloseDialog();
     };

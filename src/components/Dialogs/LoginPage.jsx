@@ -1,16 +1,36 @@
 import React, {useState} from 'react';
-import styled from 'styled-components';
 import {
-    Actions, Button, Card, Emblem, Field, Form, Header,
-    Icon, Input, InputWrap, Label, DialogWrapper, Subtitle, Title, TitleWrap, Link, LinkWrap, BeforeLinkText
+    Actions,
+    BeforeLinkText,
+    Button,
+    Card,
+    DialogWrapper,
+    Emblem,
+    Field,
+    Form,
+    Header,
+    Icon,
+    Input,
+    InputWrap,
+    Label,
+    Link,
+    LinkWrap,
+    Subtitle,
+    Title,
+    TitleWrap
 } from "../CommonStyles";
+import {GetJobMasterByPersonalNumber} from "../../api/JobMasterApi";
+import {GetSoldierByPersonalNumber} from "../../api/SoldiersApi";
+import {useNavigate} from "react-router-dom";
 
 
-export function LoginPage() {
+export function LoginPage({login}) {
     const [form, setForm] = useState({
         personalNumber: '',
         password: ''
     });
+
+    const navigate = useNavigate()
 
     const onChange = (e) => {
         const {name, value, type, checked} = e.target;
@@ -23,12 +43,19 @@ export function LoginPage() {
         const payload = {
             personalNumber: form.personalNumber.trim(),
             password: form.password,
-            remember: form.remember,
         };
-        // Replace with actual auth flow
-        // eslint-disable-next-line no-alert
-        alert(`Attempting login:\n${JSON.stringify(payload, null, 2)}`);
+
+        GetJobMasterByPersonalNumber(form.personalNumber).then(submitUserAndNavigate)
+            .catch(_ =>
+                    GetSoldierByPersonalNumber(form.personalNumber).then(submitUserAndNavigate)
+                        .catch(err => alert(`User not found: ${err.message}`))
+            )
     };
+
+    const submitUserAndNavigate = (data) => {
+        login(data.data)
+        navigate('/')
+    }
 
     return (
         <DialogWrapper>
@@ -46,13 +73,11 @@ export function LoginPage() {
                         <InputWrap>
                             <Icon>🆔</Icon>
                             <Input
-                                id="id"
-                                name="id"
-                                type="text"
+                                name="personalNumber"
+                                type="number"
                                 placeholder={`Enter Personal Number`}
                                 value={form.personalNumber}
                                 onChange={onChange}
-                                autoComplete="username"
                                 required
                             />
                         </InputWrap>

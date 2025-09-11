@@ -26,7 +26,7 @@ import {CreateSoldierApi} from "../../api/SoldiersApi";
 import {JobMasterContract} from "../../entities/contracts/JobMasterContract";
 import {SoldierContract} from "../../entities/contracts/SoldierContract";
 
-export function PasswordSetupPage() {
+export function PasswordSetupPage({login}) {
     const navigate = useNavigate();
     const {state} = useLocation();
     const account = state?.account;
@@ -67,10 +67,10 @@ export function PasswordSetupPage() {
 
         if (account.role === 'jobMaster') {
             const jobMaster = new JobMasterContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank)
-            CreateJobMasterApi(jobMaster).catch(err => console.log(err)).then()
+            CreateJobMasterApi(jobMaster).catch(err => console.log(err)).then(data => login(data.data))
         } else {
             const soldier = new SoldierContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank, account.jobMasterPersonalNumber)
-            CreateSoldierApi(soldier).catch(err => console.log(err)).then()
+            CreateSoldierApi(soldier).catch(err => console.log(err)).then(data => login(data.data))
         }
     };
 

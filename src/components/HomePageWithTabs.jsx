@@ -1,11 +1,22 @@
 // HomePage.jsx
-import React, { useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Button, Subtitle, Title} from "./CommonStyles";
 import MonthlyJobsPage from "./pages/monthly_jobs_page/MonthlyJobsPage";
+import {UserContext} from "../userContext";
+import {useNavigate} from "react-router-dom";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('monthly');
+    const navigate = useNavigate();
+
+  const user = useContext(UserContext);
+
+    useEffect(() => {
+        if (!user){
+            navigate('/login');
+        }
+    }, [user]);
 
   return (
     <Screen>

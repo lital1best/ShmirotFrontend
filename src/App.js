@@ -7,6 +7,8 @@ import React from "react";
 import {CssBaseline, ThemeProvider} from "@mui/material";
 import {MuiTheme} from "./color_themes/mui_theme";
 import {GlobalStyle} from "./color_themes/global_style";
+import {usePersistedUser, UserContext, UserProvider, useUser} from "./userContext";
+import {AppRoutes} from "./AppRoutes";
 
 
 function App() {
@@ -14,12 +16,9 @@ function App() {
         <GlobalStyle/>
         <ThemeProvider theme={MuiTheme}>
             <CssBaseline />
-            <Routes>
-                <Route path="/" element={<HomePage/>}/>
-                <Route path="/login" element={<LoginPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
-                <Route path="/signup/password" element={<PasswordSetupPage/>}/>
-            </Routes>
+            <UserProvider>
+                <AppRoutes/>
+            </UserProvider>
         </ThemeProvider>
     </BrowserRouter>
 }

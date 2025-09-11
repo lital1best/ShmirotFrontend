@@ -7,3 +7,4 @@ export const CreateJobMasterApi = (createJobMasterContract) => axios.post(jobMas
     }});
 
 export const GetJobMastersApi = () => axios.get(jobMastersBaseUrl);
+export const GetJobMasterByPersonalNumber = (personalNumber) => axios.get(`${jobMastersBaseUrl}/${personalNumber}`);

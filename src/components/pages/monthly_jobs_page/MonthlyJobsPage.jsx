@@ -6,10 +6,14 @@ import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {jobMasterJobsForMonthUrl} from "../../../api/JobMasterApi";
 import {soldiersJobsForMonthUrl} from "../../../api/SoldiersApi";
+import {Tooltip} from "@mui/material";
+import {ExemptionsOptions, ServiceStatus} from "../../../consts";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedJob, setSelectedJob] = useState(null);
+
     const {user, isJobMaster} = useUser()
     const [currentMonth, setCurrentMonth] = useState(() => {
         const d = new Date();
@@ -23,8 +27,6 @@ export default function MonthlyJobsPage() {
         mutate
     } = useSWR(getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear()));
 
-    const [jobsByDate, setJobsByDate] = useState(() => ({})); // { 'YYYY-MM-DD': [{ id, text }] }
-    const [editingDateKey, setEditingDateKey] = useState(null);
     const [newJobText, setNewJobText] = useState("");
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
@@ -33,15 +35,12 @@ export default function MonthlyJobsPage() {
     );
 
     const onPrev = () => {
-        setEditingDateKey(null);
         setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
     };
     const onNext = () => {
-        setEditingDateKey(null);
         setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
     };
     const onToday = () => {
-        setEditingDateKey(null);
         const d = new Date();
         setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
     };
@@ -51,16 +50,11 @@ export default function MonthlyJobsPage() {
         setShowAddDialog(true);
     };
 
-    const removeJob = (dateKey, id) => {
-        setJobsByDate((prev) => {
-            const list = prev[dateKey] || [];
-            return {...prev, [dateKey]: list.filter((j) => j.id !== id)};
-        });
-    };
 
     const onDialogClose = () => {
         mutate().then()
         setShowAddDialog(false);
+        setSelectedJob(null);
         setSelectedDate(null);
     };
 
@@ -85,11 +79,12 @@ export default function MonthlyJobsPage() {
 
         <DayGrid role="grid">
             {Array.from({length: leadingBlanks}).map((_, i) => (
-                <EmptyCell key={`lead-${i}`} aria-hidden="true"/>
+                <EmptyCell key={`lead-${i}`}/>
             ))}
             {monthDays.map((day) => {
                 const key = day.date.toISOString().slice(0, 10);
-                const jobs = jobsByDate[key] || [];
+                const jobsThisDay = jobs?.filter(j => j.date === key) || [];
+
                 return (
                     <DayCell
                         key={key}
@@ -108,25 +103,32 @@ export default function MonthlyJobsPage() {
                         </DayHeader>
 
                         <JobsList>
-                            {jobs.map((j) => (
-                                <JobPill key={j.id}>
-                                    <span>{j.text}</span>
-                                    <RemoveBtn
-                                        type="button"
-                                        onClick={() => removeJob(key, j.id)}>
-                                        ×
-                                    </RemoveBtn>
-                                </JobPill>
+                            {jobsThisDay?.map((job) => (
+                                <Tooltip title={
+                                    <>
+                                        <div>Description: {job.description}</div>
+                                        <div>ServiceStatus: {ServiceStatus[job.serviceStatus]}</div>
+                                        {
+                                            job?.exemptions.length > 0 &&
+                                            <div>Exemptions: {job.exemptions.map(exemptionIndex => ExemptionsOptions[exemptionIndex]).join(",")}</div>
+                                        }
+                                        <div>Score: {job.score}</div>
+                                    </>
+                                } arrow>
+                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)}>
+                                        <span>{job.location}</span>
+                                    </JobPill>
+                                </Tooltip>
                             ))}
                         </JobsList>
                     </DayCell>
                 );
             })}
             {Array.from({length: trailingBlanks}).map((_, i) => (
-                <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
+                <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        {isJobMaster && <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>}
+        {isJobMaster && <AddJobDialog isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>}
     </CalendarContainer>
 }
 

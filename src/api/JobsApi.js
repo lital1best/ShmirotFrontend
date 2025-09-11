@@ -7,3 +7,5 @@ export const createJob = (job) => axios.post(jobsBaseUrl, job, {headers: {
         'accept': 'text/plain',
         'Content-Type': 'application/json'
     }})
+
+export const editJob = (job, jobId) => axios.put(`${jobsBaseUrl}/${jobId}`, job)

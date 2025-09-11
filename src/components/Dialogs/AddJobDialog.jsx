@@ -1,20 +1,25 @@
 import {Actions, Button, Card, Field, Form, Input, Label} from "../CommonStyles";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select} from "@mui/material";
 import Modal from '@mui/material/Modal';
-import {createJob} from "../../api/JobsApi";
+import {createJob, editJob} from "../../api/JobsApi";
 import {ExemptionsOptions, ServiceStatus} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
 
 
-export function AddJobDialog({isOpen, onClose, selectedDate}) {
-    const [jobForm, setJobForm] = useState({
+export function AddJobDialog({isOpen, onClose, selectedDate, selectedJob}) {
+    const [jobForm, setJobForm] = useState( {
         description: '',
         location: '',
         serviceStatus: 0,
         exemptions: [],
-        score: 0,
+        score: 1,
     });
+
+    useEffect(() => {
+        if (!!selectedJob)
+            setJobForm(selectedJob)
+    }, [selectedJob])
 
     const {user} = useUser(UserContext);
 
@@ -23,9 +28,9 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
         setJobForm({
             description: '',
             location: '',
-            serviceStatus: ServiceStatus[0],
+            serviceStatus: 0,
             exemptions: [],
-            score: 0,
+            score: 1,
             jobMasterPersonalNumber: 0
         });
     };
@@ -33,11 +38,17 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
     const handleSubmitJob = (e) => {
         e.preventDefault();
 
-        createJob({
-            ...jobForm,
-            date: selectedDate,
-            jobMasterPersonalNumber: user.personalNumber,
-        }).then()
+        if (selectedJob){
+            editJob(jobForm, selectedJob.id).then()
+        }
+        else{
+            createJob({
+                ...jobForm,
+                date: selectedDate,
+                jobMasterPersonalNumber: user.personalNumber,
+            }).then()
+        }
+
         handleCloseDialog();
     };
 
@@ -56,7 +67,7 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
                 <Field>
                     <Label>Description</Label>
                     <Input
-                        value={jobForm.description}
+                        value={jobForm?.description}
                         onChange={e => setJobForm({...jobForm, description: e.target.value})}
                         placeholder="Job description"
                         required
@@ -116,7 +127,7 @@ export function AddJobDialog({isOpen, onClose, selectedDate}) {
                 </FormControl>
                 <Actions>
                     <Button type="button" onClick={handleCloseDialog}>Cancel</Button>
-                    <Button type="submit" $active>Add Job</Button>
+                    <Button type="submit" $active>{!!selectedJob? "Edit job": "Add a new job"}</Button>
                 </Actions>
             </Form>
         </Card>

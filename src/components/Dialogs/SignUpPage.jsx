@@ -6,6 +6,7 @@ import {
     BeforeLinkText,
     Button,
     Card,
+    DialogWrapper,
     Emblem,
     Field,
     Form,
@@ -16,18 +17,13 @@ import {
     Label,
     Link,
     LinkWrap,
-    DialogWrapper,
     Subtitle,
     Title,
     TitleWrap
 } from "../CommonStyles";
 import useSWR from "swr";
 import {jobMastersBaseUrl} from "../../api/JobMasterApi";
-import axios from "axios";
 import {JobMasterSelect} from "./JobMasterSelect";
-
-const fetcher = (url) => axios.get(url).then((res) => res.data);
-const options = {revalidateOnFocus: false, revalidateOnReconnect: false};
 
 export function SignUpPage() {
     const navigate = useNavigate();
@@ -43,7 +39,7 @@ export function SignUpPage() {
         jobMasterPersonalNumber: '',
     });
 
-    const {data: jobMasters, mutate} = useSWR(jobMastersBaseUrl, fetcher, options);
+    const {data: jobMasters, mutate} = useSWR(jobMastersBaseUrl);
 
     useEffect(() => {
             if (!!state?.account) {
@@ -215,7 +211,7 @@ export function SignUpPage() {
                                 <JobMasterSelect
                                     id="jobMasterPersonalNumber"
                                     value={form.jobMasterPersonalNumber}
-                                    options={!!form.unit? jobMasters.filter((jb) => jb.unit === form.unit): jobMasters}
+                                    options={!!form.unit ? jobMasters.filter((jb) => jb.unit === form.unit) : jobMasters}
                                     onChange={onSelectJobMaster}
                                     placeholder="Select a Job Master..."
                                     unit={form.unit}

@@ -3,16 +3,25 @@ import styled from "styled-components";
 import {Button} from "../../CommonStyles";
 import {AddJobDialog} from "../../Dialogs/AddJobDialog";
 import {useUser} from "../../../userContext";
+import useSWR from "swr";
+import {jobMasterJobsForMonthUrl} from "../../../api/JobMasterApi";
+import {soldiersJobsForMonthUrl} from "../../../api/SoldiersApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
-    const {isJobMaster} = useUser()
-
+    const {user, isJobMaster} = useUser()
     const [currentMonth, setCurrentMonth] = useState(() => {
         const d = new Date();
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
+
+
+    const getMonthJobsUrlFunction = isJobMaster ? jobMasterJobsForMonthUrl : soldiersJobsForMonthUrl
+    const {
+        data: jobs,
+        mutate
+    } = useSWR(getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear()));
 
     const [jobsByDate, setJobsByDate] = useState(() => ({})); // { 'YYYY-MM-DD': [{ id, text }] }
     const [editingDateKey, setEditingDateKey] = useState(null);
@@ -42,20 +51,6 @@ export default function MonthlyJobsPage() {
         setShowAddDialog(true);
     };
 
-
-    const submitJob = (e) => {
-        e.preventDefault();
-        const key = editingDateKey;
-        if (!key || !newJobText.trim()) return;
-        setJobsByDate((prev) => {
-            const list = prev[key] || [];
-            const next = [...list, {id: Date.now(), text: newJobText.trim()}];
-            return {...prev, [key]: next};
-        });
-        setNewJobText("");
-        setEditingDateKey(null);
-    };
-
     const removeJob = (dateKey, id) => {
         setJobsByDate((prev) => {
             const list = prev[dateKey] || [];
@@ -64,74 +59,75 @@ export default function MonthlyJobsPage() {
     };
 
     const onDialogClose = () => {
+        mutate().then()
         setShowAddDialog(false);
         setSelectedDate(null);
     };
 
     return <CalendarContainer>
-                <CalendarHeader>
-                    <HeaderLeft>
-                        <HeaderTitle>{monthLabel}</HeaderTitle>
-                        <HeaderSub>Assign and review monthly shmirot</HeaderSub>
-                    </HeaderLeft>
-                    <HeaderActions>
-                        <Button onClick={onPrev}>◀</Button>
-                        <Button onClick={onToday}>Today</Button>
-                        <Button onClick={onNext}>▶</Button>
-                    </HeaderActions>
-                </CalendarHeader>
+        <CalendarHeader>
+            <HeaderLeft>
+                <HeaderTitle>{monthLabel}</HeaderTitle>
+                <HeaderSub>Assign and review monthly shmirot</HeaderSub>
+            </HeaderLeft>
+            <HeaderActions>
+                <Button onClick={onPrev}>◀</Button>
+                <Button onClick={onToday}>Today</Button>
+                <Button onClick={onNext}>▶</Button>
+            </HeaderActions>
+        </CalendarHeader>
 
-                <Weekdays>
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                        <Weekday key={d}>{d}</Weekday>
-                    ))}
-                </Weekdays>
+        <Weekdays>
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                <Weekday key={d}>{d}</Weekday>
+            ))}
+        </Weekdays>
 
-                <DayGrid role="grid">
-                    {Array.from({length: leadingBlanks}).map((_, i) => (
-                        <EmptyCell key={`lead-${i}`} aria-hidden="true"/>
-                    ))}
-                    {monthDays.map((day) => {
-                        const key = day.date.toISOString().slice(0, 10);
-                        const jobs = jobsByDate[key] || [];
-                        return (
-                            <DayCell
-                                key={key}
-                                $today={day.isToday}
-                            >
-                                <DayHeader>
-                                    <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
-                                    { isJobMaster &&
-                                        <SmallAction
-                                            type="button"
-                                            onClick={() => startAddFor(key)}
-                                        >
-                                            + Add Job
-                                        </SmallAction>
-                                    }
-                                </DayHeader>
+        <DayGrid role="grid">
+            {Array.from({length: leadingBlanks}).map((_, i) => (
+                <EmptyCell key={`lead-${i}`} aria-hidden="true"/>
+            ))}
+            {monthDays.map((day) => {
+                const key = day.date.toISOString().slice(0, 10);
+                const jobs = jobsByDate[key] || [];
+                return (
+                    <DayCell
+                        key={key}
+                        $today={day.isToday}
+                    >
+                        <DayHeader>
+                            <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
+                            {isJobMaster &&
+                                <SmallAction
+                                    type="button"
+                                    onClick={() => startAddFor(key)}
+                                >
+                                    + Add Job
+                                </SmallAction>
+                            }
+                        </DayHeader>
 
-                                <JobsList>
-                                    {jobs.map((j) => (
-                                        <JobPill key={j.id}>
-                                            <span>{j.text}</span>
-                                            <RemoveBtn
-                                                type="button"
-                                                onClick={() => removeJob(key, j.id)}>
-                                                ×
-                                            </RemoveBtn>
-                                        </JobPill>
-                                    ))}
-                                </JobsList>
-                            </DayCell>
-                        );
-                    })}
-                    {Array.from({length: trailingBlanks}).map((_, i) => (
-                        <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
-                    ))}
-                </DayGrid>
-                {isJobMaster && <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>}
-            </CalendarContainer>
+                        <JobsList>
+                            {jobs.map((j) => (
+                                <JobPill key={j.id}>
+                                    <span>{j.text}</span>
+                                    <RemoveBtn
+                                        type="button"
+                                        onClick={() => removeJob(key, j.id)}>
+                                        ×
+                                    </RemoveBtn>
+                                </JobPill>
+                            ))}
+                        </JobsList>
+                    </DayCell>
+                );
+            })}
+            {Array.from({length: trailingBlanks}).map((_, i) => (
+                <EmptyCell key={`trail-${i}`} aria-hidden="true"/>
+            ))}
+        </DayGrid>
+        {isJobMaster && <AddJobDialog isOpen={showAddDialog} onClose={onDialogClose} selectedDate={selectedDate}/>}
+    </CalendarContainer>
 }
 
 function buildMonthView(monthDate) {

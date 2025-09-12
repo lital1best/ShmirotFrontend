@@ -1,7 +1,7 @@
 import axios from "axios";
 export const jobMastersBaseUrl = 'http://localhost:5038/api/JobMasters';
 export const jobMasterJobsForMonthUrl = (personalNumber, month, year) => `${jobMastersBaseUrl}/${personalNumber}/jobs?month=${month}&year=${year}`
-
+export const getSoldiersOrderedByScoreUrl = (personalNumber) => `${jobMastersBaseUrl}/${personalNumber}/score-list`
 
 
 export const CreateJobMasterApi = (createJobMasterContract) => axios.post(jobMastersBaseUrl, createJobMasterContract, {headers: {

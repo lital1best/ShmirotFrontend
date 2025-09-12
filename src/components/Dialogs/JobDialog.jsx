@@ -1,10 +1,12 @@
-import {Actions, Button, Card, Field, Form, Input, Label} from "../CommonStyles";
+import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../CommonStyles";
 import React, {useEffect, useState} from "react";
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select} from "@mui/material";
 import Modal from '@mui/material/Modal';
 import {createJob, deleteJob, editJob} from "../../api/JobsApi";
 import {ExemptionsOptions, ServiceStatus} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
+import useSWR from "swr";
+import {getSoldiersOrderedByScoreUrl} from "../../api/JobMasterApi";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
@@ -14,14 +16,20 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
         serviceStatus: 0,
         exemptions: [],
         score: 1,
+        soldier: null,
     });
+
 
     useEffect(() => {
         if (!!selectedJob)
             setJobForm(selectedJob)
-    }, [selectedJob])
+    }, [!!selectedJob])
 
     const {user} = useUser(UserContext);
+
+    const {data: soldiersSuggestions, mutate} = useSWR(getSoldiersOrderedByScoreUrl(user.personalNumber))
+
+    const elligableSoldiers = soldiersSuggestions?.filter(s =>  (s.exemptions.length === 0|| !s.exemptions.some(e => jobForm?.exemptions.includes(e))) && s.serviceStatus === jobForm.serviceStatus)
 
     const handleCloseDialog = () => {
         onClose();
@@ -31,6 +39,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
             serviceStatus: 0,
             exemptions: [],
             score: 1,
+            soldier: null,
             jobMasterPersonalNumber: 0
         });
     };
@@ -38,12 +47,14 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
     const handleSubmitJob = (e) => {
         e.preventDefault();
 
-        if (selectedJob){
-            editJob(jobForm, selectedJob.id).then(handleCloseDialog)
+        if (!!selectedJob){
+            editJob({
+                ...jobForm, personalNumber: jobForm.soldier.personalNumber,
+            }, selectedJob.id).then(handleCloseDialog)
         }
         else{
             createJob({
-                ...jobForm,
+                ...jobForm, personalNumber: jobForm.soldier.personalNumber,
                 date: selectedDate,
                 jobMasterPersonalNumber: user.personalNumber,
             }).then(handleCloseDialog)
@@ -92,7 +103,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                 <Field>
                     <FormControl fullWidth size="small" required>
                         <InputLabel>Service Status</InputLabel>
-                        <Select defaultValue={0}
+                        <Select value={jobForm.serviceStatus} defaultValue={jobForm.serviceStatus}
                                 onChange={e => setJobForm({...jobForm, serviceStatus: e.target.value})}
                         >
                             {
@@ -123,13 +134,23 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                         }
                     </Select>
                 </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel>Assign a soldier</InputLabel>
+                    <Select renderValue={selected => <SoldierRow soldier={selected}/>} value={jobForm?.soldier} onChange={(e) => setJobForm({...jobForm, soldier: e.target.value, personalNumber: e.target.value.personalNumber})}>
+                        {
+                            elligableSoldiers?.map((soldier) => (
+                                <MenuItem value={soldier} key={soldier.personalNumber}>
+                                    <SoldierRow soldier={soldier}/>
+                                </MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
                 <Actions>
                     <Button type="button" onClick={handleCloseDialog}>Cancel</Button>
                     {
                         !!selectedJob &&
-                        <Button color={'red'} type="button" onClick={() => {
-                            deleteJob(selectedJob.id).then(handleCloseDialog)
-                        }}>Delete job</Button>
+                            <Button type="button" onClick={() => deleteJob(selectedJob.id).then(handleCloseDialog)}>Delete job</Button>
                     }
                     <Button type="submit" $active>{!!selectedJob? "Edit job": "Add a new job"}</Button>
                 </Actions>
@@ -137,3 +158,8 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
         </Card>
     </Modal>
 }
+
+const SoldierRow = ({soldier}) => <div>
+            <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
+            <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
+        </div>

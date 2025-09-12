@@ -294,18 +294,5 @@ const JobPill = styled.div`
     border: 1px solid var(--army-green-dark);
     border-radius: 999px;
     font-size: 12px;
-`;
-
-const RemoveBtn = styled.button`
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: var(--sand);
     cursor: pointer;
-    font-size: 14px;
-    padding: 0 4px;
-
-    &:hover {
-        color: var(--accent);
-    }
 `;

@@ -14,8 +14,6 @@ import {Dropdown} from "@mui/joy";
 
 export function JobMasterSelect({id, value, options, onChange, placeholder}) {
     const [open, setOpen] = useState(false);
-    const ref = useRef(null);
-
     const selected = options.find(o => String(o.personalNumber) === String(value));
 
 

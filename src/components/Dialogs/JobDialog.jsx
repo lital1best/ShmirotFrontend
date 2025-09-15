@@ -6,11 +6,12 @@ import {createJob, deleteJob, editJob} from "../../api/JobsApi";
 import {ExemptionsOptions, ServiceStatus} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
 import useSWR from "swr";
-import {getSoldiersOrderedByScoreUrl} from "../../api/JobMasterApi";
+import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
+import {CreateSoldierConstrain} from "../../api/SoldiersConstrainsApi";
 
 
-export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
-    const [jobForm, setJobForm] = useState( {
+export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster}) {
+    const [jobForm, setJobForm] = useState({
         description: '',
         location: '',
         serviceStatus: 0,
@@ -18,6 +19,8 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
         score: 1,
         soldier: null,
     });
+
+    const [soldierConstrain ,setSoldierConstrain] = useState('')
 
 
     useEffect(() => {
@@ -27,9 +30,9 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
 
     const {user} = useUser(UserContext);
 
-    const {data: soldiersSuggestions, mutate} = useSWR(getSoldiersOrderedByScoreUrl(user.personalNumber))
+    const {data: soldiersSuggestions, mutate} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user.personalNumber))
 
-    const elligableSoldiers = soldiersSuggestions?.filter(s =>  (s.exemptions.length === 0|| !s.exemptions.some(e => jobForm?.exemptions.includes(e))) && s.serviceStatus === jobForm.serviceStatus)
+    const elligableSoldiers = soldiersSuggestions?.filter(s => canSoldierDoJob(s, jobForm))
 
     const handleCloseDialog = () => {
         onClose();
@@ -47,17 +50,26 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
     const handleSubmitJob = (e) => {
         e.preventDefault();
 
-        if (!!selectedJob){
-            editJob({
-                ...jobForm, personalNumber: jobForm.soldier.personalNumber,
-            }, selectedJob.id).then(handleCloseDialog)
+        if (isJobMaster) {
+            if (!!selectedJob) {
+                editJob({
+                    ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
+                }, selectedJob.id).then(handleCloseDialog)
+            } else {
+                createJob({
+                    ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
+                    date: selectedDate,
+                    jobMasterPersonalNumber: user?.personalNumber,
+                }).then(handleCloseDialog)
+            }
         }
+
         else{
-            createJob({
-                ...jobForm, personalNumber: jobForm.soldier.personalNumber,
-                date: selectedDate,
-                jobMasterPersonalNumber: user.personalNumber,
-            }).then(handleCloseDialog)
+            CreateSoldierConstrain({
+                personalNumber: user.personalNumber,
+                jobId: selectedJob?.id,
+                reason: soldierConstrain
+            }).then().catch()
         }
     };
 
@@ -79,6 +91,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                         value={jobForm?.description}
                         onChange={e => setJobForm({...jobForm, description: e.target.value})}
                         placeholder="Job description"
+                        readOnly={!isJobMaster}
                         required
                     />
                 </Field>
@@ -88,6 +101,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                         value={jobForm.location}
                         onChange={e => setJobForm({...jobForm, location: e.target.value})}
                         placeholder="Location"
+                        readOnly={!isJobMaster}
                         required
                     />
                 </Field>
@@ -97,14 +111,16 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                         type="number"
                         value={jobForm.score}
                         required
+                        readOnly={!isJobMaster}
                         onChange={e => setJobForm({...jobForm, score: parseInt(e.target.value)})}
                     />
                 </Field>
                 <Field>
                     <FormControl fullWidth size="small" required>
                         <InputLabel>Service Status</InputLabel>
-                        <Select value={jobForm.serviceStatus} defaultValue={jobForm.serviceStatus}
-                                onChange={e => setJobForm({...jobForm, serviceStatus: e.target.value})}
+                        <Select  value={jobForm.serviceStatus} defaultValue={jobForm.serviceStatus}
+                                 onChange={e => setJobForm({...jobForm, serviceStatus: e.target.value})}
+                                 readonly={!isJobMaster}
                         >
                             {
                                 ServiceStatus.map((value, index) => (
@@ -121,6 +137,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                     <Select
                         multiple
                         value={jobForm.exemptions}
+                        readonly={!isJobMaster}
                         onChange={(event) => setJobForm({...jobForm, exemptions: event.target.value})}
                         renderValue={(selected) => selected.map(value => ExemptionsOptions[value]).join(", ")}
                     >
@@ -134,32 +151,51 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob}) {
                         }
                     </Select>
                 </FormControl>
-                <FormControl fullWidth>
-                    <InputLabel>Assign a soldier</InputLabel>
-                    <Select renderValue={selected => <SoldierRow soldier={selected}/>} value={jobForm?.soldier} onChange={(e) => setJobForm({...jobForm, soldier: e.target.value, personalNumber: e.target.value.personalNumber})}>
-                        {
-                            elligableSoldiers?.map((soldier) => (
-                                <MenuItem value={soldier} key={soldier.personalNumber}>
-                                    <SoldierRow soldier={soldier}/>
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
+                {
+                    isJobMaster ?  <FormControl fullWidth>
+                        <InputLabel>Assign a soldier</InputLabel>
+                        <Select renderValue={selected => <SoldierRow soldier={selected}/>} value={jobForm?.soldier}
+                                onChange={(e) => setJobForm({
+                                    ...jobForm,
+                                    soldier: e.target.value,
+                                    personalNumber: e.target.value.personalNumber
+                                })}>
+                            {
+                                elligableSoldiers?.map((soldier) => (
+                                    <MenuItem value={soldier} key={soldier.personalNumber}>
+                                        <SoldierRow soldier={soldier}/>
+                                    </MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </FormControl>
+                    : <FormControl fullWidth>
+                            <Label>Constrain reason</Label>
+                            <Input
+                                value={soldierConstrain}
+                                onChange={e => setSoldierConstrain(e.target.value)}
+                                required
+                            />
+                        </FormControl>
+                }
                 <Actions>
                     <Button type="button" onClick={handleCloseDialog}>Cancel</Button>
                     {
-                        !!selectedJob &&
-                            <Button type="button" onClick={() => deleteJob(selectedJob.id).then(handleCloseDialog)}>Delete job</Button>
+                        !!selectedJob && isJobMaster &&
+                        <Button type="button" onClick={() => deleteJob(selectedJob.id).then(handleCloseDialog)}>Delete
+                            job</Button>
                     }
-                    <Button type="submit" $active>{!!selectedJob? "Edit job": "Add a new job"}</Button>
+                    { isJobMaster && <Button type="submit" $active>{!!selectedJob ? "Edit job" : "Add a new job"}</Button>}
+                    { !isJobMaster && <Button type="submit" $active> Submit a constrain </Button>}
                 </Actions>
             </Form>
         </Card>
     </Modal>
 }
 
+export const canSoldierDoJob = (soldier, job) => soldier.serviceStatus === job.serviceStatus && (!job.exemptions.length || !job.exemptions.some(e => soldier.exemptions.includes(e)))
+
 const SoldierRow = ({soldier}) => <div>
-            <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
-            <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
-        </div>
+    <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
+    <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
+</div>

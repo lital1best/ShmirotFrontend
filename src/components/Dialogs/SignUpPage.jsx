@@ -22,7 +22,7 @@ import {
     TitleWrap
 } from "../CommonStyles";
 import useSWR from "swr";
-import {jobMastersBaseUrl} from "../../api/JobMasterApi";
+import {JOB_MASTER_BASE_URL} from "../../api/JobMasterApi";
 import {JobMasterSelect} from "./JobMasterSelect";
 
 export function SignUpPage() {
@@ -39,7 +39,7 @@ export function SignUpPage() {
         jobMasterPersonalNumber: '',
     });
 
-    const {data: jobMasters, mutate} = useSWR(jobMastersBaseUrl);
+    const {data: jobMasters, mutate} = useSWR(JOB_MASTER_BASE_URL);
 
     useEffect(() => {
             if (!!state?.account) {

@@ -1,13 +1,13 @@
 import axios from "axios";
-export const jobMastersBaseUrl = 'http://localhost:5038/api/JobMasters';
-export const jobMasterJobsForMonthUrl = (personalNumber, month, year) => `${jobMastersBaseUrl}/${personalNumber}/jobs?month=${month}&year=${year}`
-export const getSoldiersOrderedByScoreUrl = (personalNumber) => `${jobMastersBaseUrl}/${personalNumber}/score-list`
+export const JOB_MASTER_BASE_URL = 'http://localhost:5038/api/JobMasters';
+export const JOB_MASTER_JOBS_FOR_MONTH_URL = (personalNumber, month, year) => `${JOB_MASTER_BASE_URL}/${personalNumber}/jobs?month=${month}&year=${year}`
+export const GET_SOLDIERS_ORDERED_BY_SCORE_URL = (personalNumber) => `${JOB_MASTER_BASE_URL}/${personalNumber}/score-list`
 
 
-export const CreateJobMasterApi = (createJobMasterContract) => axios.post(jobMastersBaseUrl, createJobMasterContract, {headers: {
+export const CreateJobMasterApi = (createJobMasterContract) => axios.post(JOB_MASTER_BASE_URL, createJobMasterContract, {headers: {
         'accept': 'text/plain',
         'Content-Type': 'application/json'
     }});
 
-export const GetJobMastersApi = () => axios.get(jobMastersBaseUrl);
-export const GetJobMasterByPersonalNumber = (personalNumber) => axios.get(`${jobMastersBaseUrl}/${personalNumber}`);
+export const GetJobMastersApi = () => axios.get(JOB_MASTER_BASE_URL);
+export const GetJobMasterByPersonalNumber = (personalNumber) => axios.get(`${JOB_MASTER_BASE_URL}/${personalNumber}`);

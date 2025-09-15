@@ -1,12 +1,12 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
-import {JobDialog} from "../../Dialogs/JobDialog";
+import {canSoldierDoJob, JobDialog} from "../../Dialogs/JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
-import {jobMasterJobsForMonthUrl} from "../../../api/JobMasterApi";
-import {soldiersJobsForMonthUrl} from "../../../api/SoldiersApi";
-import {Tooltip} from "@mui/material";
+import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
+import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
+import {backdropClasses, Tooltip} from "@mui/material";
 import {ExemptionsOptions, ServiceStatus} from "../../../consts";
 
 export default function MonthlyJobsPage() {
@@ -20,12 +20,13 @@ export default function MonthlyJobsPage() {
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
 
-    const getMonthJobsUrlFunction = isJobMaster ? jobMasterJobsForMonthUrl : soldiersJobsForMonthUrl
+    const getMonthJobsUrlFunction = isJobMaster ? JOB_MASTER_JOBS_FOR_MONTH_URL : SOLDIERS_JOBS_FOR_MONTH_URL
     const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
     const {
         data: jobs,
         mutate
     } = useSWR(swrKey);
+
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
@@ -114,7 +115,7 @@ export default function MonthlyJobsPage() {
                                         <div>Score: {job.score}</div>
                                     </>
                                 } arrow>
-                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)}>
+                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster}>
                                         <span>{job.location}</span>
                                     </JobPill>
                                 </Tooltip>
@@ -127,7 +128,7 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        {isJobMaster && <JobDialog isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>}
+        <JobDialog isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
     </CalendarContainer>
 }
 
@@ -289,7 +290,8 @@ const JobPill = styled.div`
     align-items: center;
     gap: 6px;
     padding: 6px 8px;
-    background: rgba(0, 0, 0, 0.2);
+
+    background: ${props => props.isAssigned ? 'rgba(0, 255, 0, 0.2)' : props.isJobMaster ? 'rgba(255, 0, 0, 0.2)' : 'transparent'};
     color: var(--accent-2);
     border: 1px solid var(--army-green-dark);
     border-radius: 999px;

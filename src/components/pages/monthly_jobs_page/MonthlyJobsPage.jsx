@@ -1,13 +1,14 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
-import {canSoldierDoJob, JobDialog} from "../../Dialogs/JobDialog";
+import {JobDialog} from "../../Dialogs/JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
-import {backdropClasses, Tooltip} from "@mui/material";
+import {Tooltip} from "@mui/material";
 import {ExemptionsOptions, ServiceStatus} from "../../../consts";
+import {CONSTRAINS_BASE_URL} from "../../../api/SoldiersConstrainsApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -24,9 +25,12 @@ export default function MonthlyJobsPage() {
     const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
     const {
         data: jobs,
-        mutate
+        mutate: mutateJobs
     } = useSWR(swrKey);
 
+    const {data: soldiersConstrains, mutate: mutateConstrains} = useSWR(CONSTRAINS_BASE_URL);
+    const constrains = soldiersConstrains?.filter(c => c.soldierPersonalNumber == user?.personalNumber)
+    const selectedJobConstrains = constrains?.filter(c => c.jobId === selectedJob?.id)
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
@@ -51,10 +55,12 @@ export default function MonthlyJobsPage() {
 
 
     const onDialogClose = () => {
-        mutate(swrKey).then(() => {
-            setShowAddDialog(false);
-            setSelectedJob(null);
-            setSelectedDate(null);
+        mutateConstrains().then(() => {
+            mutateJobs(swrKey).then(() => {
+                setShowAddDialog(false);
+                setSelectedJob(null);
+                setSelectedDate(null);
+            })
         })
     };
 
@@ -115,7 +121,7 @@ export default function MonthlyJobsPage() {
                                         <div>Score: {job.score}</div>
                                     </>
                                 } arrow>
-                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster}>
+                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster} hasConsrain={constrains?.some(c => c.jobId === job.id)}>
                                         <span>{job.location}</span>
                                     </JobPill>
                                 </Tooltip>
@@ -128,7 +134,7 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        <JobDialog isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
+        <JobDialog constrains={selectedJobConstrains} isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
     </CalendarContainer>
 }
 
@@ -290,8 +296,14 @@ const JobPill = styled.div`
     align-items: center;
     gap: 6px;
     padding: 6px 8px;
+    ${(props) => props.isAssigned && `
+    background: rgba(0, 255, 0, 0.2);
+  `}
 
-    background: ${props => props.isAssigned ? 'rgba(0, 255, 0, 0.2)' : props.isJobMaster ? 'rgba(255, 0, 0, 0.2)' : 'transparent'};
+    ${(props) => (props.hasConsrain || ( props.isJobMaster && !props.isAssigned)) && `
+    background: rgba(255, 0, 0, 0.2);
+  `}
+
     color: var(--accent-2);
     border: 1px solid var(--army-green-dark);
     border-radius: 999px;

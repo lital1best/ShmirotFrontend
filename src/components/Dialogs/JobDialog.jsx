@@ -1,13 +1,15 @@
 import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../CommonStyles";
 import React, {useEffect, useState} from "react";
-import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import Modal from '@mui/material/Modal';
 import {createJob, deleteJob, editJob} from "../../api/JobsApi";
-import {ExemptionsOptions, ServiceStatus} from "../../consts";
+import {SERVICE_STATUSES} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
 import useSWR from "swr";
 import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
 import {CreateSoldierConstrain, DeleteSoldierConstrain, EditSoldierConstrain} from "../../api/SoldiersConstrainsApi";
+import {SelectExemptions} from "../SelectExemptions";
+import {SelectServiceStatus} from "../SelectServiceStatus";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, constrains}) {
@@ -60,13 +62,13 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
             if (!!selectedJob) {
                 editJob({
                     ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
-                }, selectedJob.id).then(handleCloseDialog)
+                }, selectedJob.id).then(handleCloseDialog).catch()
             } else {
                 createJob({
                     ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
                     date: selectedDate,
                     jobMasterPersonalNumber: user?.personalNumber,
-                }).then(handleCloseDialog)
+                }).then(handleCloseDialog).catch()
             }
         }
 
@@ -126,43 +128,9 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                         onChange={e => setJobForm({...jobForm, score: parseInt(e.target.value)})}
                     />
                 </Field>
-                <Field>
-                    <FormControl fullWidth size="small" required>
-                        <InputLabel>Service Status</InputLabel>
-                        <Select  value={jobForm.serviceStatus} defaultValue={jobForm.serviceStatus}
-                                 onChange={e => setJobForm({...jobForm, serviceStatus: e.target.value})}
-                                 inputProps={{ readOnly: !isJobMaster }}
-                        >
-                            {
-                                ServiceStatus.map((value, index) => (
-                                    <MenuItem key={index} value={index}>
-                                        {value}
-                                    </MenuItem>
-                                ))
-                            }
-                        </Select>
-                    </FormControl>
-                </Field>
-                <FormControl fullWidth>
-                    <InputLabel>Exemptions</InputLabel>
-                    <Select
-                        multiple
-                        value={jobForm.exemptions}
-                        readonly={!isJobMaster}
-                        onChange={(event) => setJobForm({...jobForm, exemptions: event.target.value})}
-                        renderValue={(selected) => selected.map(value => ExemptionsOptions[value]).join(", ")}
-                        inputProps={{ readOnly: !isJobMaster }}
-                    >
-                        {
-                            ExemptionsOptions.map((option, index) => (
-                                <MenuItem key={option} value={index}>
-                                    <Checkbox checked={jobForm.exemptions.indexOf(index) > -1}/>
-                                    <ListItemText primary={option}/>
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
+                <SelectServiceStatus setState={setJobForm} state={jobForm} isReadonly={!isJobMaster}/>
+                <SelectExemptions setState={setJobForm} state={jobForm} isReadonly={!isJobMaster}/>
+
                 {
                     isJobMaster ?  <FormControl fullWidth>
                             <InputLabel>Assign a soldier</InputLabel>
@@ -229,3 +197,4 @@ const SoldierRow = ({soldier}) => <div>
     <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
     <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
 </div>
+

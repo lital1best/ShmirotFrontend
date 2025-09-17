@@ -1,2 +1,2 @@
-export const ServiceStatus = ["MANDATORY", "OFFICER", "NAGAD"]
-export const ExemptionsOptions = ["STANDING", "SUN", "WEAPON", "WEIGHT", "NIGHT"];
+export const SERVICE_STATUSES = ["MANDATORY", "OFFICER", "NAGAD"]
+export const EXEMPTIONS_OPTIONS = ["STANDING", "SUN", "WEAPON", "WEIGHT", "NIGHT"];

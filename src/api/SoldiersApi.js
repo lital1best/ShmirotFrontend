@@ -5,3 +5,5 @@ export const SOLDIERS_JOBS_FOR_MONTH_URL = (personalNumber, month, year) => `${B
 
 export const CreateSoldierApi = (createSoldierContract) => axios.post(BASE_SOLDIERS_URL, createSoldierContract);
 export const GetSoldierByPersonalNumber = (personalNumber) => axios.get(`${BASE_SOLDIERS_URL}/${personalNumber}`);
+
+export const EditSoldierApi = (personalNumber, editSoldierContract) => axios.put(`${BASE_SOLDIERS_URL}/${personalNumber}`, editSoldierContract);

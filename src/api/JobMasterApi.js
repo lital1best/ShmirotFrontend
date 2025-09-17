@@ -11,3 +11,5 @@ export const CreateJobMasterApi = (createJobMasterContract) => axios.post(JOB_MA
 
 export const GetJobMastersApi = () => axios.get(JOB_MASTER_BASE_URL);
 export const GetJobMasterByPersonalNumber = (personalNumber) => axios.get(`${JOB_MASTER_BASE_URL}/${personalNumber}`);
+
+export const EditJobMasterApi = (personalNumber, jobMasterContract) => axios.put(`${JOB_MASTER_BASE_URL}/${personalNumber}`, jobMasterContract)

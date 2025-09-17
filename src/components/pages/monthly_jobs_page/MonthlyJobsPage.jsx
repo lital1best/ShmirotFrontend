@@ -7,7 +7,7 @@ import useSWR from "swr";
 import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {Tooltip} from "@mui/material";
-import {ExemptionsOptions, ServiceStatus} from "../../../consts";
+import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
 import {CONSTRAINS_BASE_URL} from "../../../api/SoldiersConstrainsApi";
 
 export default function MonthlyJobsPage() {
@@ -52,7 +52,6 @@ export default function MonthlyJobsPage() {
         setSelectedDate(dateKey);
         setShowAddDialog(true);
     };
-
 
     const onDialogClose = () => {
         mutateConstrains().then(() => {
@@ -113,10 +112,10 @@ export default function MonthlyJobsPage() {
                                 <Tooltip title={
                                     <>
                                         <div>Description: {job.description}</div>
-                                        <div>ServiceStatus: {ServiceStatus[job.serviceStatus]}</div>
+                                        <div>ServiceStatus: {SERVICE_STATUSES[job.serviceStatus]}</div>
                                         {
                                             job?.exemptions.length > 0 &&
-                                            <div>Exemptions: {job.exemptions.map(exemptionIndex => ExemptionsOptions[exemptionIndex]).join(",")}</div>
+                                            <div>Exemptions: {job.exemptions.map(exemptionIndex => EXEMPTIONS_OPTIONS[exemptionIndex]).join(",")}</div>
                                         }
                                         <div>Score: {job.score}</div>
                                     </>

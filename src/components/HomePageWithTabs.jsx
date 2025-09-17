@@ -1,15 +1,16 @@
 // HomePage.jsx
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import { Button, Subtitle, Title } from "./CommonStyles";
+import {Button, Subtitle, Title} from "./CommonStyles";
 import MonthlyJobsPage from "./pages/monthly_jobs_page/MonthlyJobsPage";
-import { useUser } from "../userContext";
-import { useNavigate } from "react-router-dom";
+import {useUser} from "../userContext";
+import {useNavigate} from "react-router-dom";
+import {PersonalDetailsPage} from "./pages/personal_details/PersonalDetailsPage";
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');
     const navigate = useNavigate();
-    const { user, logout } = useUser();
+    const {user, logout} = useUser();
 
     useEffect(() => {
         if (!user) {
@@ -17,7 +18,7 @@ export default function HomePage() {
         }
     }, [!!user]);
 
-    return (
+    return (!!user &&
         <Screen>
             <Tabs role="tablist" aria-label="Shmirot sections">
                 <StyledTabButton
@@ -33,10 +34,6 @@ export default function HomePage() {
                     Score
                 </StyledTabButton>
                 <StyledTabButton
-                    role="tab"
-                    aria-selected={activeTab === 'personal'}
-                    aria-controls="tab-personal"
-                    id="tab-personal-btn"
                     $active={activeTab === 'personal'}
                     onClick={() => setActiveTab('personal')}
                 >
@@ -53,21 +50,14 @@ export default function HomePage() {
                     <Button onClick={logout}>Logout</Button>
                 </Header>
 
-                <Panel
-                    id="tab-monthly"
-                    role="tabpanel"
-                    aria-labelledby="tab-monthly-btn"
-                    hidden={activeTab !== 'monthly'}
+                <Panel hidden={activeTab !== 'monthly'}
                 >
                     <Placeholder>
-                        <MonthlyJobsPage />
+                        <MonthlyJobsPage/>
                     </Placeholder>
                 </Panel>
 
                 <Panel
-                    id="tab-score"
-                    role="tabpanel"
-                    aria-labelledby="tab-score-btn"
                     hidden={activeTab !== 'score'}
                 >
                     <SectionTitle>Score</SectionTitle>
@@ -78,16 +68,10 @@ export default function HomePage() {
                 </Panel>
 
                 <Panel
-                    id="tab-personal"
-                    role="tabpanel"
-                    aria-labelledby="tab-personal-btn"
                     hidden={activeTab !== 'personal'}
                 >
                     <SectionTitle>Personal Details</SectionTitle>
-                    <Placeholder>
-                        {/* Replace with editable profile fields */}
-                        Coming soon: your profile, contact info, and preferences.
-                    </Placeholder>
+                    <PersonalDetailsPage currentTab={activeTab} />
                 </Panel>
             </Container>
         </Screen>
@@ -119,9 +103,9 @@ const StyledTabButton = styled(Button)`
     padding: 8px 16px;
     border: none;
     background: ${({$active}) =>
-    $active ? 'rgba(255, 255, 255, 0.1)' : 'transparent'};
+            $active ? 'rgba(255, 255, 255, 0.1)' : 'transparent'};
     border-left: ${({$active}) =>
-    $active ? '2px solid var(--accent-1)' : 'none'};
+            $active ? '2px solid var(--accent-1)' : 'none'};
     color: ${({$active}) => ($active ? 'var(--accent-1)' : 'var(--sand)')};
     font-weight: ${({$active}) => ($active ? '600' : '400')};
     cursor: pointer;
@@ -145,16 +129,16 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 24px;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 100;
-  border-bottom: 1px solid var(--army-green-dark);
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 100;
+    border-bottom: 1px solid var(--army-green-dark);
 `;
 
 const Panel = styled.section`
@@ -189,3 +173,4 @@ const Placeholder = styled.div`
     opacity: 0.9;
     font-size: 14px;
 `;
+

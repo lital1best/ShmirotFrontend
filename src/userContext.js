@@ -8,7 +8,6 @@ export function usePersistedUser() {
     const isJobMaster = user?.hasOwnProperty('jobs')
 
     useEffect(() => {
-        console.log("here")
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
             setUser(JSON.parse(storedUser));

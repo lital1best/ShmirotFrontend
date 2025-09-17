@@ -24,6 +24,7 @@ import {
 import useSWR from "swr";
 import {JOB_MASTER_BASE_URL} from "../../api/JobMasterApi";
 import {JobMasterSelect} from "./JobMasterSelect";
+import {SelectServiceStatus} from "../SelectServiceStatus";
 
 export function SignUpPage() {
     const navigate = useNavigate();
@@ -204,8 +205,10 @@ export function SignUpPage() {
                     </Field>
 
                     {form.role === 'soldier' && (
+                        <>
+                        <SelectServiceStatus setState={setForm} state={form}/>
                         <Field>
-                            <Label htmlFor="jobMasterPersonalNumber">Choose Job Master</Label>
+                            <Label>Choose Job Master</Label>
                             <InputWrap>
                                 <Icon>👤</Icon>
                                 <JobMasterSelect
@@ -218,6 +221,7 @@ export function SignUpPage() {
                                 />
                             </InputWrap>
                         </Field>
+                        </>
                     )}
 
                     <Actions>

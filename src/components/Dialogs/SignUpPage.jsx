@@ -61,7 +61,7 @@ export function SignUpPage() {
 
     // Helper for custom dropdown selection
     const onSelectJobMaster = (personalNumber) => {
-        const jobMaster = jobMasters.find(jm => jm.personalNumber == personalNumber)
+        const jobMaster = jobMasters.find(jm => jm.personalNumber === personalNumber)
         setForm((f) => ({...f, jobMasterPersonalNumber: personalNumber, unit: jobMaster.unit}));
     };
 

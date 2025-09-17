@@ -18,7 +18,6 @@ export function PersonalDetailsPage({currentTab}) {
     }, [user, currentTab]);
 
 
-
     const onSubmit = (e) => {
         e.preventDefault()
 
@@ -46,7 +45,6 @@ export function PersonalDetailsPage({currentTab}) {
                 <TextField
                     label="Last Name"
                     variant="outlined"
-                    defaultValue={user?.lastName}
                     fullWidth
                     value={soldier?.lastName}
                     required
@@ -57,7 +55,6 @@ export function PersonalDetailsPage({currentTab}) {
                 <TextField
                     label="Rank"
                     variant="outlined"
-                    defaultValue={user?.rank}
                     onChange={(e) => setSoldier({...soldier, rank: e.target.value})}
                     fullWidth
                     value={soldier?.rank}
@@ -67,7 +64,6 @@ export function PersonalDetailsPage({currentTab}) {
                     label="Unit"
                     variant="outlined"
                     value={soldier?.unit}
-                    defaultValue={user?.unit}
                     onChange={(e) => setSoldier({...soldier, unit: e.target.value})}
                     fullWidth
                 />

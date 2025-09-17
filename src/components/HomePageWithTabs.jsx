@@ -10,7 +10,7 @@ import {ScoreBoard} from "./pages/ScoreBoard";
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');
     const navigate = useNavigate();
-    const {user, logout, isJobMaster} = useUser();
+    const {user, logout} = useUser();
 
     useEffect(() => {
         if (!user) {

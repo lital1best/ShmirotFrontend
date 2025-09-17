@@ -1,0 +1,57 @@
+import styled from "styled-components";
+import useSWR from "swr";
+import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
+import {useUser} from "../../userContext";
+import {useEffect} from "react";
+
+export function ScoreBoard({currentTab}) {
+    const {user, isJobMaster} = useUser();
+
+    const {data: soldiers, mutate} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(isJobMaster ? user?.personalNumber : user?.jobMasterPersonalNumber))
+
+    useEffect(() => {
+        if (currentTab === 'score') mutate().then()
+    }, [currentTab])
+
+    return <ScoreList>
+        {soldiers?.toReversed().map((soldier) => (
+            <ScoreItem key={soldier.personalNumber}>
+                <ScoreName>{soldier.firstName} {soldier.lastName}</ScoreName>
+                <ScoreDetails>
+                    <span>Score: {soldier.score}</span>
+                    <span>Rank: {soldier.rank}</span>
+                </ScoreDetails>
+            </ScoreItem>
+        ))}
+    </ScoreList>
+}
+
+
+const ScoreList = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+`;
+
+const ScoreItem = styled.div`
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid var(--army-green-dark);
+`;
+
+const ScoreName = styled.div`
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sand);
+    margin-bottom: 4px;
+`;
+
+const ScoreDetails = styled.div`
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--sand);
+    opacity: 0.8;
+`;
+

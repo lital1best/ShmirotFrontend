@@ -1,16 +1,16 @@
-// HomePage.jsx
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Button, Subtitle, Title} from "./CommonStyles";
-import MonthlyJobsPage from "./pages/monthly_jobs_page/MonthlyJobsPage";
+import MonthlyJobsPage from "./pages/MonthlyJobsPage";
 import {useUser} from "../userContext";
 import {useNavigate} from "react-router-dom";
-import {PersonalDetailsPage} from "./pages/personal_details/PersonalDetailsPage";
+import {PersonalDetailsPage} from "./pages/PersonalDetailsPage";
+import {ScoreBoard} from "./pages/ScoreBoard";
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');
     const navigate = useNavigate();
-    const {user, logout} = useUser();
+    const {user, logout, isJobMaster} = useUser();
 
     useEffect(() => {
         if (!user) {
@@ -52,26 +52,15 @@ export default function HomePage() {
 
                 <Panel hidden={activeTab !== 'monthly'}
                 >
-                    <Placeholder>
-                        <MonthlyJobsPage/>
-                    </Placeholder>
+                    <MonthlyJobsPage/>
                 </Panel>
-
-                <Panel
-                    hidden={activeTab !== 'score'}
-                >
-                    <SectionTitle>Score</SectionTitle>
-                    <Placeholder>
-                        {/* Replace with score widgets/charts */}
-                        Coming soon: your current score, history, and rankings.
-                    </Placeholder>
+                <Panel hidden={activeTab !== 'score'}>
+                    <SectionTitle>Score Leaderboard</SectionTitle>
+                    <ScoreBoard currentTab={activeTab}/>
                 </Panel>
-
-                <Panel
-                    hidden={activeTab !== 'personal'}
-                >
+                <Panel hidden={activeTab !== 'personal'}>
                     <SectionTitle>Personal Details</SectionTitle>
-                    <PersonalDetailsPage currentTab={activeTab} />
+                    <PersonalDetailsPage currentTab={activeTab}/>
                 </Panel>
             </Container>
         </Screen>
@@ -167,10 +156,3 @@ const SectionTitle = styled.h2`
     margin: 0 0 10px 0;
     color: var(--accent-2);
 `;
-
-const Placeholder = styled.div`
-    color: var(--sand);
-    opacity: 0.9;
-    font-size: 14px;
-`;
-

@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {useUser} from "../../../userContext";
+import {useUser} from "../../userContext";
 import {Button, TextField} from "@mui/material";
 import styled from "styled-components";
-import {SelectExemptions} from "../../SelectExemptions";
-import {SelectServiceStatus} from "../../SelectServiceStatus";
-import {EditJobMasterApi} from "../../../api/JobMasterApi";
-import {EditSoldierApi} from "../../../api/SoldiersApi";
+import {SelectExemptions} from "../SelectExemptions";
+import {SelectServiceStatus} from "../SelectServiceStatus";
+import {EditJobMasterApi} from "../../api/JobMasterApi";
+import {EditSoldierApi} from "../../api/SoldiersApi";
 
 export function PersonalDetailsPage({currentTab}) {
     const {user, isJobMaster, login} = useUser()
@@ -23,7 +23,7 @@ export function PersonalDetailsPage({currentTab}) {
         e.preventDefault()
 
         if (isJobMaster) {
-            EditJobMasterApi(soldier, soldier.personalNumber).then().catch()
+            EditJobMasterApi(soldier.personalNumber, soldier).then().catch()
         }
         else{
             EditSoldierApi(soldier?.personalNumber, soldier).then().catch()

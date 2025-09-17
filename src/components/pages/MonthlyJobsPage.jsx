@@ -1,14 +1,14 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
-import {Button} from "../../CommonStyles";
-import {JobDialog} from "../../Dialogs/JobDialog";
-import {useUser} from "../../../userContext";
+import {Button} from "../CommonStyles";
+import {JobDialog} from "../Dialogs/JobDialog";
+import {useUser} from "../../userContext";
 import useSWR from "swr";
-import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
-import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
+import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../api/JobMasterApi";
+import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../api/SoldiersApi";
 import {Tooltip} from "@mui/material";
-import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
-import {CONSTRAINS_BASE_URL} from "../../../api/SoldiersConstrainsApi";
+import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../consts";
+import {CONSTRAINS_BASE_URL} from "../../api/SoldiersConstrainsApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);

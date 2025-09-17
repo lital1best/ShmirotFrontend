@@ -1,18 +1,23 @@
 import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../CommonStyles";
 import React, {useEffect, useState} from "react";
-import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select, Tooltip} from "@mui/material";
 import Modal from '@mui/material/Modal';
+import WarningIcon from '@mui/icons-material/Warning';
 import {createJob, deleteJob, editJob} from "../../api/JobsApi";
-import {SERVICE_STATUSES} from "../../consts";
 import {UserContext, useUser} from "../../userContext";
 import useSWR from "swr";
 import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
-import {CreateSoldierConstrain, DeleteSoldierConstrain, EditSoldierConstrain} from "../../api/SoldiersConstrainsApi";
+import {
+    CreateSoldierConstrain,
+    DeleteSoldierConstrain,
+    EditSoldierConstrain,
+    GET_CONSTRAINTS_BY_JOB_ID_URL
+} from "../../api/SoldiersConstrainsApi";
 import {SelectExemptions} from "../SelectExemptions";
 import {SelectServiceStatus} from "../SelectServiceStatus";
 
 
-export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, constrains}) {
+export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, userConstraint}) {
     const [jobForm, setJobForm] = useState({
         description: '',
         location: '',
@@ -21,7 +26,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
         score: 1,
         soldier: null,
     });
-    const [soldierConstrain ,setSoldierConstrain] = useState({})
+    const [constraintReason ,setConstraintReason] = useState('')
 
 
     useEffect(() => {
@@ -30,15 +35,16 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
     }, [!!selectedJob])
 
     useEffect(() => {
-        if (constrains?.length && !isJobMaster)
-            setSoldierConstrain(constrains[0])
-    }, [constrains])
+        if (!!userConstraint && !isJobMaster)
+            setConstraintReason(userConstraint.reason)
+    }, [userConstraint])
 
     const {user} = useUser(UserContext);
 
-    const {data: soldiersSuggestions, mutate} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
+    const {data: soldiersSuggestions} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
+    const {data: jobConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
 
-    const elligableSoldiers = soldiersSuggestions?.filter(s => canSoldierDoJob(s, jobForm))
+    const eligibleSoldiers = soldiersSuggestions?.filter(s => canSoldierDoJob(s, jobForm))
 
     const handleCloseDialog = () => {
         onClose();
@@ -52,7 +58,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
             jobMasterPersonalNumber: 0
         });
 
-        setSoldierConstrain(null)
+        setConstraintReason('')
     };
 
     const handleSubmitJob = (e) => {
@@ -73,14 +79,14 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
         }
 
         else{
-            if (constrains?.length){
-                EditSoldierConstrain(soldierConstrain?.reason, soldierConstrain?.id).then(handleCloseDialog).catch()
+            if (!!userConstraint){
+                EditSoldierConstrain(constraintReason, userConstraint?.id).then(handleCloseDialog).catch()
             }
             else {
                 CreateSoldierConstrain({
                     soldierPersonalNumber: user.personalNumber,
                     jobId: selectedJob?.id,
-                    reason: soldierConstrain.reason
+                    reason: constraintReason
                 }).then(handleCloseDialog).catch()
             }
         }
@@ -137,7 +143,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                             <div style={{display: 'flex', gap: '8px'}}>
                                 <Select
                                     fullWidth
-                                    renderValue={selected => <SoldierRow soldier={selected}/>}
+                                    renderValue={selected => <SoldierRow soldier={selected} jobConstraints={jobConstraints}/>}
                                     value={jobForm?.soldier}
                                     onChange={(e) => setJobForm({
                                         ...jobForm,
@@ -145,9 +151,9 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                                         personalNumber: e.target.value.personalNumber
                                     })}>
                                     {
-                                        elligableSoldiers?.map((soldier) => (
+                                        eligibleSoldiers?.map((soldier) => (
                                             <MenuItem value={soldier} key={soldier.personalNumber}>
-                                                <SoldierRow soldier={soldier}/>
+                                            <SoldierRow soldier={soldier} jobConstraints={jobConstraints}/>
                                             </MenuItem>
                                         ))
                                     }
@@ -165,8 +171,8 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     : <FormControl fullWidth>
                             <Label>Constrain reason</Label>
                             <Input
-                                value={soldierConstrain?.reason}
-                                onChange={e => setSoldierConstrain(prev=> ({...prev, reason: e.target.value}))}
+                                value={constraintReason}
+                                onChange={e => setConstraintReason(e.target.value)}
                                 required
                             />
                         </FormControl>
@@ -179,12 +185,12 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                             job</Button>
                     }
                     {
-                        !!selectedJob && !isJobMaster && soldierConstrain && soldierConstrain?.id &&
-                        <Button type="button" onClick={() => DeleteSoldierConstrain(soldierConstrain.id).then(handleCloseDialog)}>Delete
+                        !!selectedJob && !isJobMaster && userConstraint && userConstraint?.id &&
+                        <Button type="button" onClick={() => DeleteSoldierConstrain(userConstraint.id).then(handleCloseDialog)}>Delete
                             constrain</Button>
                     }
                     { isJobMaster && <Button type="submit" $active>{!!selectedJob ? "Edit job" : "Add a new job"}</Button>}
-                    { !isJobMaster && <Button type="submit" $active> {constrains?.length? "Edit constrain": "Submit a constrain"} </Button>}
+                    { !isJobMaster && <Button type="submit" $active> {!!userConstraint? "Edit constrain": "Submit a constrain"} </Button>}
                 </Actions>
             </Form>
         </Card>
@@ -193,8 +199,22 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
 
 export const canSoldierDoJob = (soldier, job) => soldier.serviceStatus === job.serviceStatus && (!job.exemptions.length || !job.exemptions.some(e => soldier.exemptions.includes(e)))
 
-const SoldierRow = ({soldier}) => <div>
-    <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
-    <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
-</div>
+const SoldierRow = ({soldier, jobConstraints}) => {
+    const soldierConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === soldier.personalNumber);
+
+    return (
+        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+            {soldierConstraint && (
+                <Tooltip title={`Constraint: ${soldierConstraint.reason}`} style={{marginLeft: 'auto'}}>
+                    <WarningIcon color="error" fontSize="small"/>
+                </Tooltip>
+            )}
+
+            <div style={{flexGrow: 1}}>
+                <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
+                <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
+            </div>
+        </div>
+    );
+}
 

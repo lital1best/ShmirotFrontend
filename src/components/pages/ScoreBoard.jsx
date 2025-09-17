@@ -3,6 +3,7 @@ import useSWR from "swr";
 import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
 import {useUser} from "../../userContext";
 import {useEffect} from "react";
+import {SERVICE_STATUSES} from "../../consts";
 
 export function ScoreBoard({currentTab}) {
     const {user, isJobMaster} = useUser();
@@ -11,7 +12,7 @@ export function ScoreBoard({currentTab}) {
 
     useEffect(() => {
         if (currentTab === 'score') mutate().then()
-    }, [currentTab])
+    }, [currentTab === 'score'])
 
     return <ScoreList>
         {soldiers?.toReversed().map((soldier) => (
@@ -20,6 +21,8 @@ export function ScoreBoard({currentTab}) {
                 <ScoreDetails>
                     <span>Score: {soldier.score}</span>
                     <span>Rank: {soldier.rank}</span>
+                    <span>Service Status: {SERVICE_STATUSES[soldier.serviceStatus]}</span>
+
                 </ScoreDetails>
             </ScoreItem>
         ))}

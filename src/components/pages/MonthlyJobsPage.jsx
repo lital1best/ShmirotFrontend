@@ -8,7 +8,7 @@ import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../api/SoldiersApi";
 import {Tooltip} from "@mui/material";
 import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../consts";
-import {CONSTRAINS_BASE_URL} from "../../api/SoldiersConstrainsApi";
+import {GET_CONSTRAINTS_BY_SOLDIER_URL} from "../../api/SoldiersConstrainsApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -28,9 +28,8 @@ export default function MonthlyJobsPage() {
         mutate: mutateJobs
     } = useSWR(swrKey);
 
-    const {data: soldiersConstrains, mutate: mutateConstrains} = useSWR(CONSTRAINS_BASE_URL);
-    const constrains = soldiersConstrains?.filter(c => c.soldierPersonalNumber == user?.personalNumber)
-    const selectedJobConstrains = constrains?.filter(c => c.jobId === selectedJob?.id)
+    const {data: userConstraints, mutate: mutateUserConstrains} = useSWR(!isJobMaster && GET_CONSTRAINTS_BY_SOLDIER_URL(user?.personalNumber))
+    const userConstraintOfSelectedJob =  userConstraints?.find(c => c.jobId === selectedJob?.id)
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
@@ -54,12 +53,11 @@ export default function MonthlyJobsPage() {
     };
 
     const onDialogClose = () => {
-        mutateConstrains().then(() => {
-            mutateJobs(swrKey).then(() => {
-                setShowAddDialog(false);
-                setSelectedJob(null);
-                setSelectedDate(null);
-            })
+        mutateUserConstrains().then();
+        mutateJobs(swrKey).then(() => {
+            setShowAddDialog(false);
+            setSelectedJob(null);
+            setSelectedDate(null);
         })
     };
 
@@ -120,7 +118,7 @@ export default function MonthlyJobsPage() {
                                         <div>Score: {job.score}</div>
                                     </>
                                 } arrow>
-                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster} hasConsrain={constrains?.some(c => c.jobId === job.id)}>
+                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster} hasConsrain={userConstraints?.some(c => c.jobId === job.id)}>
                                         <span>{job.location}</span>
                                     </JobPill>
                                 </Tooltip>
@@ -133,7 +131,7 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        <JobDialog constrains={selectedJobConstrains} isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
+        <JobDialog userConstraint={userConstraintOfSelectedJob} isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
     </CalendarContainer>
 }
 

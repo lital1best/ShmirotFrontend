@@ -1,14 +1,15 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
-import {Button} from "../CommonStyles";
-import {JobDialog} from "../Dialogs/JobDialog";
-import {useUser} from "../../userContext";
+import {Button} from "../../CommonStyles";
+import {JobDialog} from "./JobDialog";
+import {useUser} from "../../../userContext";
 import useSWR from "swr";
-import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../api/JobMasterApi";
-import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../api/SoldiersApi";
+import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
+import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {Tooltip} from "@mui/material";
-import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../consts";
-import {GET_CONSTRAINTS_BY_SOLDIER_URL} from "../../api/SoldiersConstrainsApi";
+import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
+import {DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL, GET_CONSTRAINTS_BY_SOLDIER_URL} from "../../../api/SoldiersConstrainsApi";
+import {JobCalendarMark} from "./JobCalendarMark";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -27,9 +28,6 @@ export default function MonthlyJobsPage() {
         data: jobs,
         mutate: mutateJobs
     } = useSWR(swrKey);
-
-    const {data: userConstraints, mutate: mutateUserConstrains} = useSWR(!isJobMaster && GET_CONSTRAINTS_BY_SOLDIER_URL(user?.personalNumber))
-    const userConstraintOfSelectedJob =  userConstraints?.find(c => c.jobId === selectedJob?.id)
 
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
@@ -53,7 +51,6 @@ export default function MonthlyJobsPage() {
     };
 
     const onDialogClose = () => {
-        mutateUserConstrains().then();
         mutateJobs(swrKey).then(() => {
             setShowAddDialog(false);
             setSelectedJob(null);
@@ -86,7 +83,7 @@ export default function MonthlyJobsPage() {
             ))}
             {monthDays?.map((day) => {
                 const key = day.date.toISOString().slice(0, 10);
-                const jobsThisDay = Array.isArray(jobs)? jobs?.filter(j => j.date === key) : [];
+                const jobsThisDay = Array.isArray(jobs) ? jobs?.filter(j => j.date === key) : [];
 
                 return (
                     <DayCell
@@ -106,23 +103,9 @@ export default function MonthlyJobsPage() {
                         </DayHeader>
 
                         <JobsList>
-                            {jobsThisDay?.map((job) => (
-                                <Tooltip title={
-                                    <>
-                                        <div>Description: {job.description}</div>
-                                        <div>ServiceStatus: {SERVICE_STATUSES[job.serviceStatus]}</div>
-                                        {
-                                            job?.exemptions.length > 0 &&
-                                            <div>Exemptions: {job.exemptions.map(exemptionIndex => EXEMPTIONS_OPTIONS[exemptionIndex]).join(",")}</div>
-                                        }
-                                        <div>Score: {job.score}</div>
-                                    </>
-                                } arrow>
-                                    <JobPill key={job.id} onClick={()=> setSelectedJob(job)} isAssigned={!!job?.soldier} isJobMaster={isJobMaster} hasConsrain={userConstraints?.some(c => c.jobId === job.id)}>
-                                        <span>{job.location}</span>
-                                    </JobPill>
-                                </Tooltip>
-                            ))}
+                            {
+                                jobsThisDay?.map((job) => <JobCalendarMark job={job} setSelectedJob={setSelectedJob}/>)
+                            }
                         </JobsList>
                     </DayCell>
                 );
@@ -131,7 +114,9 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        <JobDialog userConstraint={userConstraintOfSelectedJob} isJobMaster={isJobMaster} isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate} selectedJob={selectedJob}/>
+        <JobDialog isJobMaster={isJobMaster}
+                   isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate}
+                   selectedJob={selectedJob}/>
     </CalendarContainer>
 }
 
@@ -159,6 +144,7 @@ function buildMonthView(monthDate) {
 function isSameDate(a, b) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
+
 
 
 const CalendarContainer = styled.div`
@@ -288,22 +274,4 @@ const JobsList = styled.div`
     gap: 6px;
 `;
 
-const JobPill = styled.div`
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    ${(props) => props.isAssigned && `
-    background: rgba(0, 255, 0, 0.2);
-  `}
 
-    ${(props) => (props.hasConsrain || ( props.isJobMaster && !props.isAssigned)) && `
-    background: rgba(255, 0, 0, 0.2);
-  `}
-
-    color: var(--accent-2);
-    border: 1px solid var(--army-green-dark);
-    border-radius: 999px;
-    font-size: 12px;
-    cursor: pointer;
-`;

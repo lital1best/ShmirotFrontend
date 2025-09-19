@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Button, Subtitle, Title} from "./CommonStyles";
-import MonthlyJobsPage from "./pages/MonthlyJobsPage";
+import MonthlyJobsPage from "./pages/jobs_calendar/MonthlyJobsPage";
 import {useUser} from "../userContext";
 import {useNavigate} from "react-router-dom";
 import {PersonalDetailsPage} from "./pages/PersonalDetailsPage";

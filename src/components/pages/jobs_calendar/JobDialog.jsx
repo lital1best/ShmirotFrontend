@@ -1,23 +1,23 @@
-import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../CommonStyles";
+import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../../CommonStyles";
 import React, {useEffect, useState} from "react";
 import {FormControl, InputLabel, MenuItem, Select, Tooltip} from "@mui/material";
 import Modal from '@mui/material/Modal';
 import WarningIcon from '@mui/icons-material/Warning';
-import {createJob, deleteJob, editJob} from "../../api/JobsApi";
-import {UserContext, useUser} from "../../userContext";
+import {createJob, deleteJob, editJob} from "../../../api/JobsApi";
+import {UserContext, useUser} from "../../../userContext";
 import useSWR from "swr";
-import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
+import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../../api/JobMasterApi";
 import {
     CreateSoldierConstrain,
     DeleteSoldierConstrain,
     EditSoldierConstrain,
     GET_CONSTRAINTS_BY_JOB_ID_URL
-} from "../../api/SoldiersConstrainsApi";
-import {SelectExemptions} from "../SelectExemptions";
-import {SelectServiceStatus} from "../SelectServiceStatus";
+} from "../../../api/SoldiersConstrainsApi";
+import {SelectExemptions} from "../../SelectExemptions";
+import {SelectServiceStatus} from "../../SelectServiceStatus";
 
 
-export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, userConstraint}) {
+export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster}) {
     const [jobForm, setJobForm] = useState({
         description: '',
         location: '',
@@ -34,15 +34,16 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
             setJobForm(selectedJob)
     }, [!!selectedJob])
 
-    useEffect(() => {
-        if (!!userConstraint && !isJobMaster)
-            setConstraintReason(userConstraint.reason)
-    }, [userConstraint])
-
     const {user} = useUser(UserContext);
 
     const {data: soldiersSuggestions} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
     const {data: jobConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
+    const userConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === user?.personalNumber)
+
+    useEffect(() => {
+        if (!!jobConstraints && !isJobMaster && !!userConstraint)
+            setConstraintReason(userConstraint?.reason)
+    }, [jobConstraints])
 
     const eligibleSoldiers = soldiersSuggestions?.filter(s => canSoldierDoJob(s, jobForm))
 

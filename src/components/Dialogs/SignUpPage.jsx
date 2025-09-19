@@ -129,11 +129,10 @@ export function SignUpPage() {
                     </Field>
 
                     <Field>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label>Last Name</Label>
                         <InputWrap>
                             <Icon>🧾</Icon>
                             <Input
-                                id="lastName"
                                 name="lastName"
                                 type="text"
                                 placeholder="Enter Last Name"
@@ -150,7 +149,6 @@ export function SignUpPage() {
                         <InputWrap>
                             <Icon>🎖️</Icon>
                             <Input
-                                id="rank"
                                 name="rank"
                                 type="text"
                                 placeholder="Enter Rank"
@@ -166,7 +164,6 @@ export function SignUpPage() {
                         <InputWrap>
                             <Icon>🏷️</Icon>
                             <Input
-                                id="unit"
                                 name="unit"
                                 type="text"
                                 placeholder="Enter Unit"

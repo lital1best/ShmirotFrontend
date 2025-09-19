@@ -1,20 +1,23 @@
-import React, {useMemo, useState} from "react";
+import React, {useMemo, useEffect, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
 import {JobDialog} from "./JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
-import {JOB_MASTER_JOBS_FOR_MONTH_URL} from "../../../api/JobMasterApi";
+import {JOB_MASTER_JOBS_FOR_MONTH_URL, SuggestJobsForMonthApi} from "../../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {Tooltip} from "@mui/material";
 import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
 import {DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL, GET_CONSTRAINTS_BY_SOLDIER_URL} from "../../../api/SoldiersConstrainsApi";
 import {JobCalendarMark} from "./JobCalendarMark";
+import {editJob} from "../../../api/JobsApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
+    const [suggestions, setSuggestions] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const {user, isJobMaster} = useUser()
     const [currentMonth, setCurrentMonth] = useState(() => {
@@ -58,6 +61,26 @@ export default function MonthlyJobsPage() {
         })
     };
 
+    const onSuggestClick = async () => {
+        const suggestionsData = await SuggestJobsForMonthApi(user.personalNumber, currentMonth.getMonth() + 1, currentMonth.getFullYear());
+        setSuggestions(suggestionsData.data);
+        setIsEditMode(true);
+    }
+
+    const submitSuggestions = async () => {
+        await Promise.all(suggestions.map(suggestion =>
+            editJob({
+                ...jobs.find(j => j.id === suggestion.jobId),
+                personalNumber: suggestion.soldierPersonalNumber
+            }, suggestion.jobId)
+        ));
+        setIsEditMode(false);
+        setSuggestions(null);
+        mutateJobs().then();
+
+    }
+
+
     return <CalendarContainer>
         <CalendarHeader>
             <HeaderLeft>
@@ -65,6 +88,12 @@ export default function MonthlyJobsPage() {
                 <HeaderSub>Assign and review monthly shmirot</HeaderSub>
             </HeaderLeft>
             <HeaderActions>
+                {isEditMode ? (
+                    <Button hidden={!isJobMaster} onClick={submitSuggestions}>Submit Suggestions</Button>
+                ) : (
+                    <Button hidden={!isJobMaster} onClick={onSuggestClick}>Suggest Assigns</Button>
+                )}
+
                 <Button onClick={onPrev}>◀</Button>
                 <Button onClick={onToday}>Today</Button>
                 <Button onClick={onNext}>▶</Button>
@@ -104,7 +133,17 @@ export default function MonthlyJobsPage() {
 
                         <JobsList>
                             {
-                                jobsThisDay?.map((job) => <JobCalendarMark job={job} setSelectedJob={setSelectedJob}/>)
+                                jobsThisDay?.map((job) => {
+                                    const suggestion = suggestions?.find(s => s.jobId === job.id);
+                                    return <JobCalendarMark
+                                        job={{
+                                            ...job,
+                                            soldier: suggestion?.soldierPersonalNumber || job.soldier,
+                                            isSuggestion: !!suggestion
+                                        }}
+                                        setSelectedJob={setSelectedJob}
+                                    />
+                                })
                             }
                         </JobsList>
                     </DayCell>

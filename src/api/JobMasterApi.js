@@ -13,3 +13,5 @@ export const GetJobMastersApi = () => axios.get(JOB_MASTER_BASE_URL);
 export const GetJobMasterByPersonalNumber = (personalNumber) => axios.get(`${JOB_MASTER_BASE_URL}/${personalNumber}`);
 
 export const EditJobMasterApi = (personalNumber, jobMasterContract) => axios.put(`${JOB_MASTER_BASE_URL}/${personalNumber}`, jobMasterContract)
+
+export const SuggestJobsForMonthApi = (personalNumber, month, year) => axios.get(`${JOB_MASTER_BASE_URL}/${personalNumber}/suggest-jobs/?month=${month}&year=${year}`)

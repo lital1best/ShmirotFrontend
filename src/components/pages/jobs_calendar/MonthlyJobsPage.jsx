@@ -1,22 +1,23 @@
-import React, {useMemo, useEffect, useState} from "react";
+import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
-import {JobDialog} from "./JobDialog";
+import {canSoldierDoJob, JobDialog, SoldierRow} from "./JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
-import {JOB_MASTER_JOBS_FOR_MONTH_URL, SuggestJobsForMonthApi} from "../../../api/JobMasterApi";
+import {
+    GET_SOLDIERS_ORDERED_BY_SCORE_URL,
+    JOB_MASTER_JOBS_FOR_MONTH_URL,
+    SuggestJobsForMonthApi
+} from "../../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
-import {Tooltip} from "@mui/material";
-import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
-import {DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL, GET_CONSTRAINTS_BY_SOLDIER_URL} from "../../../api/SoldiersConstrainsApi";
 import {JobCalendarMark} from "./JobCalendarMark";
-import {editJob} from "../../../api/JobsApi";
+import {SubmitJobsAssignment} from "../../../api/JobsApi";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null);
-    const [suggestions, setSuggestions] = useState(null);
+    const [suggestionsMap, setSuggestionsMap] = useState({});
     const [isEditMode, setIsEditMode] = useState(false);
 
     const {user, isJobMaster} = useUser()
@@ -24,6 +25,8 @@ export default function MonthlyJobsPage() {
         const d = new Date();
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
+
+    const {data: soldiersByScore} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
 
     const getMonthJobsUrlFunction = isJobMaster ? JOB_MASTER_JOBS_FOR_MONTH_URL : SOLDIERS_JOBS_FOR_MONTH_URL
     const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
@@ -58,26 +61,20 @@ export default function MonthlyJobsPage() {
             setShowAddDialog(false);
             setSelectedJob(null);
             setSelectedDate(null);
+            setSuggestionsMap({});
+            setIsEditMode(false);
         })
     };
 
     const onSuggestClick = async () => {
         const suggestionsData = await SuggestJobsForMonthApi(user.personalNumber, currentMonth.getMonth() + 1, currentMonth.getFullYear());
-        setSuggestions(suggestionsData.data);
+
+        setSuggestionsMap(new Map(suggestionsData.data.map(suggestion => [suggestion.jobId, suggestion.soldierPersonalNumber])));
         setIsEditMode(true);
     }
 
     const submitSuggestions = async () => {
-        await Promise.all(suggestions.map(suggestion =>
-            editJob({
-                ...jobs.find(j => j.id === suggestion.jobId),
-                personalNumber: suggestion.soldierPersonalNumber
-            }, suggestion.jobId)
-        ));
-        setIsEditMode(false);
-        setSuggestions(null);
-        mutateJobs().then();
-
+        SubmitJobsAssignment(Object.keys(suggestionsMap).map(key => ({jobId: key, soldierPersonalNumber: suggestionsMap[key]}))).then(onDialogClose).catch(console.error)
     }
 
 
@@ -89,7 +86,10 @@ export default function MonthlyJobsPage() {
             </HeaderLeft>
             <HeaderActions>
                 {isEditMode ? (
-                    <Button hidden={!isJobMaster} onClick={submitSuggestions}>Submit Suggestions</Button>
+                    <>
+                        <EditModeIndicator>Edit Mode</EditModeIndicator>
+                        <Button hidden={!isJobMaster} onClick={submitSuggestions}>Submit Suggestions</Button>
+                    </>
                 ) : (
                     <Button hidden={!isJobMaster} onClick={onSuggestClick}>Suggest Assigns</Button>
                 )}
@@ -134,14 +134,18 @@ export default function MonthlyJobsPage() {
                         <JobsList>
                             {
                                 jobsThisDay?.map((job) => {
-                                    const suggestion = suggestions?.find(s => s.jobId === job.id);
+                                    const suggestion = suggestionsMap[job.id];
                                     return <JobCalendarMark
+                                        onClick={() => {
+                                            startAddFor(job.date);
+                                            setSelectedJob(job)
+                                        }}
                                         job={{
                                             ...job,
-                                            soldier: suggestion?.soldierPersonalNumber || job.soldier,
+                                            soldier: suggestion?.soldierPersonalNumber ?? job.soldier,
                                             isSuggestion: !!suggestion
                                         }}
-                                        setSelectedJob={setSelectedJob}
+                                        isSelected={selectedJob?.id === job.id}
                                     />
                                 })
                             }
@@ -153,10 +157,37 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
+        {selectedJob && isEditMode && <SoldiersListForEdit suggestionsMap={suggestionsMap} selectedJob={selectedJob} soldiersByScore={soldiersByScore} setSuggestionsMap={setSuggestionsMap}/>}
         <JobDialog isJobMaster={isJobMaster}
-                   isOpen={showAddDialog || !!selectedJob} onClose={onDialogClose} selectedDate={selectedDate}
-                   selectedJob={selectedJob}/>
+                   isOpen={showAddDialog && !isEditMode} onClose={onDialogClose} selectedDate={selectedDate}
+                   selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
+
     </CalendarContainer>
+}
+
+export function SoldiersListForEdit({suggestionsMap, selectedJob, soldiersByScore, setSuggestionsMap}){
+    const selectedSoldierPersonalNumber = suggestionsMap[selectedJob.id] ?? soldiersByScore?.find(s => s.personalNumber === selectedJob?.soldier?.personalNumber)?.personalNumber;
+
+    return <EligibleSoldiersContainer>
+            <HeaderTitle>Eligible Soldiers for {selectedJob.description}</HeaderTitle>
+            <SoldiersList>
+                {
+                    soldiersByScore?.filter(s => canSoldierDoJob(s, selectedJob)).map(soldier => (
+                    <SoldierItem
+                    key={soldier?.personalNumber}
+                    $isSelected={selectedSoldierPersonalNumber === soldier?.personalNumber}
+                    onClick={async () => {
+                        setSuggestionsMap((prev) => ({
+                            ...prev,
+                            [selectedJob.id]: soldier.personalNumber
+                        }));
+                    }}>
+                        <SoldierRow soldier={soldier} jobConstraints={[]}/>
+                    </SoldierItem>
+                    ))
+                }
+        </SoldiersList>
+    </EligibleSoldiersContainer>
 }
 
 function buildMonthView(monthDate) {
@@ -223,6 +254,16 @@ const HeaderSub = styled.span`
 const HeaderActions = styled.div`
     display: flex;
     gap: 8px;
+`;
+
+const EditModeIndicator = styled.div`
+    background-color: red;
+    color: var(--sand);
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
 `;
 
 const Weekdays = styled.div`
@@ -311,6 +352,33 @@ const JobsList = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+`;
+
+const EligibleSoldiersContainer = styled.div`
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(168, 159, 123, 0.08);
+    border: 1px solid var(--army-green-dark);
+    border-radius: 10px;
+`;
+
+const SoldiersList = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 4px;
+    margin-top: 12px;
+`;
+
+const SoldierItem = styled.div`
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    background: ${props => props.$isSelected ? 'rgba(199, 211, 111, 0.2)' : 'transparent'};
+
+    &:hover {
+        background: rgba(199, 211, 111, 0.1);
+    }
 `;
 
 

@@ -6,10 +6,10 @@ import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
 import React from "react";
 import styled from "styled-components";
 
-export function JobCalendarMark({job, setSelectedJob}) {
+export function JobCalendarMark({job, onClick, isSelected}) {
     const {user, isJobMaster} = useUser()
 
-    const {data: hasConstraint} = useSWR((!isJobMaster || job?.soldier) && DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL(isJobMaster? job?.soldier: user.personalNumber, job.id))
+    const {data: hasConstraint} = useSWR((!isJobMaster || job?.soldier) && DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL(isJobMaster? job?.soldier?.personalNumber ?? job?.soldier: user.personalNumber, job.id))
 
     return <Tooltip title={
         <>
@@ -22,8 +22,8 @@ export function JobCalendarMark({job, setSelectedJob}) {
             <div>Score: {job.score}</div>
         </>
     } arrow>
-        <JobPill key={job.id} onClick={() => setSelectedJob(job)}
-                 isAssigned={!!job?.soldier} isJobMaster={isJobMaster}
+        <JobPill key={job.id} onClick={onClick}
+                 isAssigned={!!job?.soldier} isJobMaster={isJobMaster} isSelected={isSelected}
                  hasConstraint={hasConstraint}>
             <span>{job.location}</span>
         </JobPill>
@@ -45,6 +45,15 @@ const JobPill = styled.div`
 
     ${(props) => (props.hasConstraint) && `
     background: #cc6600;
+  `}
+
+    ${(props) => props.isSelected && `
+    animation: highlightBorder 2s linear infinite;
+    @keyframes highlightBorder {
+      0% { border-color: var(--army-green-dark); }
+      50% { border-color: #4CAF50; }
+      100% { border-color: var(--army-green-dark); }
+    }
   `}
 
     color: var(--accent-2);

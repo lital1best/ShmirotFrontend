@@ -17,7 +17,7 @@ import {SelectExemptions} from "../../SelectExemptions";
 import {SelectServiceStatus} from "../../SelectServiceStatus";
 
 
-export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster}) {
+export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, soldiersByScore}) {
     const [jobForm, setJobForm] = useState({
         description: '',
         location: '',
@@ -36,7 +36,9 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
 
     const {user} = useUser(UserContext);
 
-    const {data: soldiersSuggestions} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
+    const eligibleSoldiers = soldiersByScore?.filter(s => canSoldierDoJob(s, jobForm))
+
+
     const {data: jobConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
     const userConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === user?.personalNumber)
 
@@ -45,7 +47,6 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
             setConstraintReason(userConstraint?.reason)
     }, [jobConstraints])
 
-    const eligibleSoldiers = soldiersSuggestions?.filter(s => canSoldierDoJob(s, jobForm))
 
     const handleCloseDialog = () => {
         onClose();
@@ -200,7 +201,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
 
 export const canSoldierDoJob = (soldier, job) => soldier.serviceStatus === job.serviceStatus && (!job.exemptions.length || !job.exemptions.some(e => soldier.exemptions.includes(e)))
 
-const SoldierRow = ({soldier, jobConstraints}) => {
+export const SoldierRow = ({soldier, jobConstraints}) => {
     const soldierConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === soldier.personalNumber);
 
     return (

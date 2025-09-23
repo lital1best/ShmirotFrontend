@@ -3,13 +3,20 @@ import useSWR from "swr";
 import {DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL} from "../../../api/SoldiersConstrainsApi";
 import {Tooltip} from "@mui/material";
 import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
-import React from "react";
+import React, {useEffect} from "react";
 import styled from "styled-components";
 
-export function JobCalendarMark({job, onClick, isSelected}) {
+export function JobCalendarMark({job, onClick, selectedJob}) {
     const {user, isJobMaster} = useUser()
 
-    const {data: hasConstraint} = useSWR((!isJobMaster || job?.soldier) && DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL(isJobMaster? job?.soldier?.personalNumber ?? job?.soldier: user.personalNumber, job.id))
+    const {data: hasConstraint, mutate} = useSWR((!isJobMaster || job?.soldier) && DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL(isJobMaster? job?.soldier?.personalNumber ?? job?.soldier: user.personalNumber, job.id))
+
+    useEffect(() => {
+        if (!selectedJob){
+            mutate().then()
+        }
+    }, [!!selectedJob]);
+
 
     return <Tooltip title={
         <>
@@ -23,7 +30,7 @@ export function JobCalendarMark({job, onClick, isSelected}) {
         </>
     } arrow>
         <JobPill key={job.id} onClick={onClick}
-                 isAssigned={!!job?.soldier} isJobMaster={isJobMaster} isSelected={isSelected}
+                 isAssigned={!!job?.soldier} isJobMaster={isJobMaster} isSelected={selectedJob?.id === job.id}
                  hasConstraint={hasConstraint}>
             <span>{job.location}</span>
         </JobPill>

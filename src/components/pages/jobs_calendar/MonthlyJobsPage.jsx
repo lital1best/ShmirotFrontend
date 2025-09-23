@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
-import {canSoldierDoJob, JobDialog, SoldierRow} from "./JobDialog";
+import {JobDialog} from "./JobDialog";
 import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {
@@ -12,6 +12,7 @@ import {
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {JobCalendarMark} from "./JobCalendarMark";
 import {SubmitJobsAssignment} from "../../../api/JobsApi";
+import {SoldiersListForEdit} from "./SoldiersListForEdit";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -26,7 +27,7 @@ export default function MonthlyJobsPage() {
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
 
-    const {data: soldiersByScore} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
+    const {data: soldiersByScore, mutate: mutateSoldiers} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
 
     const getMonthJobsUrlFunction = isJobMaster ? JOB_MASTER_JOBS_FOR_MONTH_URL : SOLDIERS_JOBS_FOR_MONTH_URL
     const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
@@ -56,25 +57,29 @@ export default function MonthlyJobsPage() {
         setShowAddDialog(true);
     };
 
-    const onDialogClose = () => {
-        mutateJobs(swrKey).then(() => {
-            setShowAddDialog(false);
-            setSelectedJob(null);
-            setSelectedDate(null);
-            setSuggestionsMap({});
-            setIsEditMode(false);
-        })
+    const onDialogClose = async () => {
+        await mutateSoldiers()
+        await mutateJobs(swrKey)
+        setShowAddDialog(false);
+        setSelectedJob(null);
+        setSelectedDate(null);
+        setSuggestionsMap({});
+        setIsEditMode(false);
     };
 
     const onSuggestClick = async () => {
         const suggestionsData = await SuggestJobsForMonthApi(user.personalNumber, currentMonth.getMonth() + 1, currentMonth.getFullYear());
-
-        setSuggestionsMap(new Map(suggestionsData.data.map(suggestion => [suggestion.jobId, suggestion.soldierPersonalNumber])));
+        const suggestionsDict = {}
+        suggestionsData.data.forEach(suggestion => {
+            suggestionsDict[suggestion.jobId] = suggestion.soldierPersonalNumber
+        })
+        setSuggestionsMap(suggestionsDict);
         setIsEditMode(true);
     }
 
     const submitSuggestions = async () => {
-        SubmitJobsAssignment(Object.keys(suggestionsMap).map(key => ({jobId: key, soldierPersonalNumber: suggestionsMap[key]}))).then(onDialogClose).catch(console.error)
+        const assignmentList = Object.entries(suggestionsMap).map(([key, value] )=> ({jobID :key, soldierPersonalNumber: value}))
+        SubmitJobsAssignment(assignmentList).then(onDialogClose).catch(console.error)
     }
 
 
@@ -88,7 +93,7 @@ export default function MonthlyJobsPage() {
                 {isEditMode ? (
                     <>
                         <EditModeIndicator>Edit Mode</EditModeIndicator>
-                        <Button hidden={!isJobMaster} onClick={submitSuggestions}>Submit Suggestions</Button>
+                        <Button onClick={submitSuggestions}>Submit Suggestions</Button>
                     </>
                 ) : (
                     <Button hidden={!isJobMaster} onClick={onSuggestClick}>Suggest Assigns</Button>
@@ -121,7 +126,7 @@ export default function MonthlyJobsPage() {
                     >
                         <DayHeader>
                             <DayNumber $today={day.isToday}>{day.date.getDate()}</DayNumber>
-                            {isJobMaster &&
+                            {isJobMaster && !isEditMode &&
                                 <SmallAction
                                     type="button"
                                     onClick={() => startAddFor(key)}
@@ -134,7 +139,7 @@ export default function MonthlyJobsPage() {
                         <JobsList>
                             {
                                 jobsThisDay?.map((job) => {
-                                    const suggestion = suggestionsMap[job.id];
+                                    const suggestedSoldierPersonalNumber = suggestionsMap[job.id];
                                     return <JobCalendarMark
                                         onClick={() => {
                                             startAddFor(job.date);
@@ -142,10 +147,10 @@ export default function MonthlyJobsPage() {
                                         }}
                                         job={{
                                             ...job,
-                                            soldier: suggestion?.soldierPersonalNumber ?? job.soldier,
-                                            isSuggestion: !!suggestion
+                                            soldier: suggestedSoldierPersonalNumber ?? job.soldier,
+                                            isSuggestion: !!suggestedSoldierPersonalNumber
                                         }}
-                                        isSelected={selectedJob?.id === job.id}
+                                        selectedJob={selectedJob}
                                     />
                                 })
                             }
@@ -163,31 +168,6 @@ export default function MonthlyJobsPage() {
                    selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
 
     </CalendarContainer>
-}
-
-export function SoldiersListForEdit({suggestionsMap, selectedJob, soldiersByScore, setSuggestionsMap}){
-    const selectedSoldierPersonalNumber = suggestionsMap[selectedJob.id] ?? soldiersByScore?.find(s => s.personalNumber === selectedJob?.soldier?.personalNumber)?.personalNumber;
-
-    return <EligibleSoldiersContainer>
-            <HeaderTitle>Eligible Soldiers for {selectedJob.description}</HeaderTitle>
-            <SoldiersList>
-                {
-                    soldiersByScore?.filter(s => canSoldierDoJob(s, selectedJob)).map(soldier => (
-                    <SoldierItem
-                    key={soldier?.personalNumber}
-                    $isSelected={selectedSoldierPersonalNumber === soldier?.personalNumber}
-                    onClick={async () => {
-                        setSuggestionsMap((prev) => ({
-                            ...prev,
-                            [selectedJob.id]: soldier.personalNumber
-                        }));
-                    }}>
-                        <SoldierRow soldier={soldier} jobConstraints={[]}/>
-                    </SoldierItem>
-                    ))
-                }
-        </SoldiersList>
-    </EligibleSoldiersContainer>
 }
 
 function buildMonthView(monthDate) {
@@ -216,7 +196,6 @@ function isSameDate(a, b) {
 }
 
 
-
 const CalendarContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -239,7 +218,7 @@ const HeaderLeft = styled.div`
     flex-direction: column;
 `;
 
-const HeaderTitle = styled.h3`
+export const HeaderTitle = styled.h3`
     margin: 0;
     font-size: 20px;
     color: var(--accent-2);
@@ -353,32 +332,4 @@ const JobsList = styled.div`
     flex-wrap: wrap;
     gap: 6px;
 `;
-
-const EligibleSoldiersContainer = styled.div`
-    margin-top: 20px;
-    padding: 16px;
-    background: rgba(168, 159, 123, 0.08);
-    border: 1px solid var(--army-green-dark);
-    border-radius: 10px;
-`;
-
-const SoldiersList = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 4px;
-    margin-top: 12px;
-`;
-
-const SoldierItem = styled.div`
-    padding: 4px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em;
-    background: ${props => props.$isSelected ? 'rgba(199, 211, 111, 0.2)' : 'transparent'};
-
-    &:hover {
-        background: rgba(199, 211, 111, 0.1);
-    }
-`;
-
 

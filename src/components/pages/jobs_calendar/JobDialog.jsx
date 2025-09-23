@@ -28,39 +28,40 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
     });
     const [constraintReason ,setConstraintReason] = useState('')
 
-
-    useEffect(() => {
-        if (!!selectedJob)
-            setJobForm(selectedJob)
-    }, [!!selectedJob])
-
     const {user} = useUser(UserContext);
 
     const eligibleSoldiers = soldiersByScore?.filter(s => canSoldierDoJob(s, jobForm))
 
-
-    const {data: jobConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
+    const {data: jobConstraints, mutate: mutateConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
     const userConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === user?.personalNumber)
 
     useEffect(() => {
-        if (!!jobConstraints && !isJobMaster && !!userConstraint)
-            setConstraintReason(userConstraint?.reason)
+        if (!isJobMaster && !!selectedJob){
+            setConstraintReason(userConstraint?.reason ?? '')
+        }
     }, [jobConstraints])
+
+    useEffect(() => {
+        if (!!selectedJob){
+            setJobForm(selectedJob)
+        }
+    }, [!!selectedJob])
 
 
     const handleCloseDialog = () => {
-        onClose();
-        setJobForm({
-            description: '',
-            location: '',
-            serviceStatus: 0,
-            exemptions: [],
-            score: 1,
-            soldier: null,
-            jobMasterPersonalNumber: 0
+        onClose().then(() => {
+            setJobForm({
+                description: '',
+                location: '',
+                serviceStatus: 0,
+                exemptions: [],
+                score: 1,
+                soldier: null,
+                jobMasterPersonalNumber: 0
+            });
+            mutateConstraints().then()
+            setConstraintReason('')
         });
-
-        setConstraintReason('')
     };
 
     const handleSubmitJob = (e) => {
@@ -119,7 +120,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                 <Field>
                     <Label>Location</Label>
                     <Input
-                        value={jobForm.location}
+                        value={jobForm?.location}
                         onChange={e => setJobForm({...jobForm, location: e.target.value})}
                         placeholder="Location"
                         readOnly={!isJobMaster}

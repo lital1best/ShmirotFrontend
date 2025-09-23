@@ -1,10 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {
     Actions,
     BeforeLinkText,
     Button,
     Card,
+    DialogWrapper,
     Emblem,
     Field,
     Form,
@@ -15,16 +16,12 @@ import {
     Label,
     Link,
     LinkWrap,
-    DialogWrapper,
     Subtitle,
     Title,
     TitleWrap
 } from "../CommonStyles";
 import {CreateJobMasterApi} from "../../api/JobMasterApi";
-import {options} from "axios";
 import {CreateSoldierApi} from "../../api/SoldiersApi";
-import {JobMasterContract} from "../../entities/contracts/JobMasterContract";
-import {SoldierContract} from "../../entities/contracts/SoldierContract";
 import {UserContext, useUser} from "../../userContext";
 
 export function PasswordSetupPage() {
@@ -69,11 +66,9 @@ export function PasswordSetupPage() {
         }
 
         if (account.role === 'jobMaster') {
-            const jobMaster = new JobMasterContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank)
-            CreateJobMasterApi(jobMaster).catch(err => console.log(err)).then(data => login(data.data))
+            CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(data?.data))
         } else {
-            const soldier = new SoldierContract(account.personalNumber, account.firstName, account.lastName, account.unit, account.rank, account.jobMasterPersonalNumber)
-            CreateSoldierApi(soldier).catch(err => console.log(err)).then(data => login(data.data))
+            CreateSoldierApi(account).catch(err => console.log(err)).then(data => login(data?.data))
         }
     };
 

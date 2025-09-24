@@ -22,7 +22,7 @@ import {
 import {GetJobMasterByPersonalNumber} from "../../api/JobMasterApi";
 import {GetSoldierByPersonalNumber} from "../../api/SoldiersApi";
 import {useNavigate} from "react-router-dom";
-import {useUser} from "../../userContext";
+import {useUser} from "../../UserContext";
 
 
 export function LoginPage() {

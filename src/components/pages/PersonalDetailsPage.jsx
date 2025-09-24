@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {useUser} from "../../userContext";
 import {Button, TextField} from "@mui/material";
 import styled from "styled-components";
 import {SelectExemptions} from "../SelectExemptions";
 import {SelectServiceStatus} from "../SelectServiceStatus";
 import {EditJobMasterApi} from "../../api/JobMasterApi";
 import {EditSoldierApi} from "../../api/SoldiersApi";
+import {useUser} from "../../UserContext";
 
 export function PersonalDetailsPage({currentTab}) {
     const {user, isJobMaster, login} = useUser()

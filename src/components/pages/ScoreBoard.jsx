@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import useSWR from "swr";
 import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../api/JobMasterApi";
-import {useUser} from "../../userContext";
 import {useEffect} from "react";
 import {SERVICE_STATUSES} from "../../consts";
+import {useUser} from "../../UserContext";
 
 export function ScoreBoard({currentTab}) {
     const {user, isJobMaster} = useUser();

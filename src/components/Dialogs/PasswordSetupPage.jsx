@@ -22,12 +22,15 @@ import {
 } from "../CommonStyles";
 import {CreateJobMasterApi} from "../../api/JobMasterApi";
 import {CreateSoldierApi} from "../../api/SoldiersApi";
-import {UserContext, useUser} from "../../userContext";
+import {auth} from "../../firebase";
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {verifyToken} from "../../api/AuthApi";
+import {useUser} from "../../UserContext";
 
 export function PasswordSetupPage() {
     const navigate = useNavigate();
     const {state} = useLocation();
-    const {login} = useUser(UserContext);
+    const {login} = useUser();
 
     const account = state?.account;
 
@@ -39,6 +42,7 @@ export function PasswordSetupPage() {
     }, [account, navigate]);
 
     const [form, setForm] = useState({
+        email: '',
         password: '',
         confirmPassword: '',
     });
@@ -48,10 +52,15 @@ export function PasswordSetupPage() {
         setForm((f) => ({...f, [name]: value}));
     };
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
 
         const errors = [];
+        if (!form.email) {
+            errors.push('Email is required.');
+        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+            errors.push('Please enter a valid email address.');
+        }
         if (form.password.length < 6) {
             errors.push('Password must be at least 6 characters.');
         }
@@ -64,6 +73,12 @@ export function PasswordSetupPage() {
             alert(errors.join('\n'));
             return;
         }
+
+        const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password)
+        const token = await userCredential.user.getIdToken();
+
+        const res = await verifyToken(token)
+        console.log(res)
 
         if (account.role === 'jobMaster') {
             CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(data?.data))
@@ -84,6 +99,22 @@ export function PasswordSetupPage() {
                 </Header>
 
                 <Form onSubmit={onSubmit}>
+                    <Field>
+                        <Label htmlFor="email">Email</Label>
+                        <InputWrap>
+                            <Icon>📧</Icon>
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="Enter Email"
+                                value={form.email}
+                                onChange={onChange}
+                                autoComplete="email"
+                                required
+                            />
+                        </InputWrap>
+                    </Field>
                     <Field>
                         <Label htmlFor="password">Password</Label>
                         <InputWrap>

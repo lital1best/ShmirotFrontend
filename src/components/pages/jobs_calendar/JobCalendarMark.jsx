@@ -1,10 +1,10 @@
-import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {DOES_SOLDIER_HAS_CONSTRAINT_FOR_JOB_URL} from "../../../api/SoldiersConstrainsApi";
 import {Tooltip} from "@mui/material";
 import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
 import React, {useEffect} from "react";
 import styled from "styled-components";
+import {useUser} from "../../../UserContext";
 
 export function JobCalendarMark({job, onClick, selectedJob}) {
     const {user, isJobMaster} = useUser()

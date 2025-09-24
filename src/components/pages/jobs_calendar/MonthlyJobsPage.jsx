@@ -2,7 +2,6 @@ import React, {useMemo, useState} from "react";
 import styled from "styled-components";
 import {Button} from "../../CommonStyles";
 import {JobDialog} from "./JobDialog";
-import {useUser} from "../../../userContext";
 import useSWR from "swr";
 import {
     GET_SOLDIERS_ORDERED_BY_SCORE_URL,
@@ -13,6 +12,7 @@ import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {JobCalendarMark} from "./JobCalendarMark";
 import {SubmitJobsAssignment} from "../../../api/JobsApi";
 import {SoldiersListForEdit} from "./SoldiersListForEdit";
+import {useUser} from "../../../UserContext";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);

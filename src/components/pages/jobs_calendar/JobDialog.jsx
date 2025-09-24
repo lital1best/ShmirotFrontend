@@ -4,9 +4,7 @@ import {FormControl, InputLabel, MenuItem, Select, Tooltip} from "@mui/material"
 import Modal from '@mui/material/Modal';
 import WarningIcon from '@mui/icons-material/Warning';
 import {createJob, deleteJob, editJob} from "../../../api/JobsApi";
-import {UserContext, useUser} from "../../../userContext";
 import useSWR from "swr";
-import {GET_SOLDIERS_ORDERED_BY_SCORE_URL} from "../../../api/JobMasterApi";
 import {
     CreateSoldierConstrain,
     DeleteSoldierConstrain,
@@ -15,6 +13,7 @@ import {
 } from "../../../api/SoldiersConstrainsApi";
 import {SelectExemptions} from "../../SelectExemptions";
 import {SelectServiceStatus} from "../../SelectServiceStatus";
+import {useUser} from "../../../UserContext";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, soldiersByScore}) {
@@ -28,7 +27,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
     });
     const [constraintReason ,setConstraintReason] = useState('')
 
-    const {user} = useUser(UserContext);
+    const {user} = useUser();
 
     const eligibleSoldiers = soldiersByScore?.filter(s => canSoldierDoJob(s, jobForm))
 

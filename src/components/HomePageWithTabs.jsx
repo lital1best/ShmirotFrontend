@@ -2,10 +2,10 @@ import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Button, Subtitle, Title} from "./CommonStyles";
 import MonthlyJobsPage from "./pages/jobs_calendar/MonthlyJobsPage";
-import {useUser} from "../userContext";
 import {useNavigate} from "react-router-dom";
 import {PersonalDetailsPage} from "./pages/PersonalDetailsPage";
 import {ScoreBoard} from "./pages/ScoreBoard";
+import {useUser} from "../UserContext";
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');

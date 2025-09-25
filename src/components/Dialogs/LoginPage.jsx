@@ -27,7 +27,7 @@ import {useUser} from "../../UserContext";
 
 export function LoginPage() {
     const [form, setForm] = useState({
-        personalNumber: '',
+        email: '',
         password: ''
     });
 
@@ -45,25 +45,10 @@ export function LoginPage() {
         setForm((f) => ({...f, [name]: type === 'checkbox' ? checked : value}));
     };
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
-        // Placeholder submit handler
-        const payload = {
-            personalNumber: form.personalNumber.trim(),
-            password: form.password,
-        };
-
-        GetJobMasterByPersonalNumber(form.personalNumber).then(submitUserAndNavigate)
-            .catch(_ =>
-                    GetSoldierByPersonalNumber(form.personalNumber).then(submitUserAndNavigate)
-                        .catch(err => alert(`User not found: ${err.message}`))
-            )
+        await login(form.email, form.password)
     };
-
-    const submitUserAndNavigate = (data) => {
-        login(data.data)
-        navigate('/')
-    }
 
     return (
         <DialogWrapper>
@@ -77,15 +62,16 @@ export function LoginPage() {
                 </Header>
                 <Form onSubmit={onSubmit}>
                     <Field>
-                        <Label htmlFor="id">Personal Number</Label>
+                        <Label> Email </Label>
                         <InputWrap>
-                            <Icon>🆔</Icon>
+                            <Icon>📧</Icon>
                             <Input
-                                name="personalNumber"
-                                type="number"
-                                placeholder={`Enter Personal Number`}
-                                value={form.personalNumber}
+                                name="email"
+                                type="email"
+                                placeholder='Enter Email'
+                                value={form.email}
                                 onChange={onChange}
+                                autoComplete="email"
                                 required
                             />
                         </InputWrap>

@@ -8,7 +8,7 @@ import {EditSoldierApi} from "../../api/SoldiersApi";
 import {useUser} from "../../UserContext";
 
 export function PersonalDetailsPage({currentTab}) {
-    const {user, isJobMaster, login} = useUser()
+    const {user, isJobMaster, mutateUserWithToken} = useUser()
     const [soldier, setSoldier] = useState(user);
 
     useEffect(() => {
@@ -18,17 +18,16 @@ export function PersonalDetailsPage({currentTab}) {
     }, [user, currentTab]);
 
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault()
 
         if (isJobMaster) {
-            EditJobMasterApi(soldier.personalNumber, soldier).then().catch()
+            EditJobMasterApi(soldier.personalNumber, soldier).then(mutateUserWithToken).catch()
         }
         else{
-            EditSoldierApi(soldier?.personalNumber, soldier).then().catch()
+            EditSoldierApi(soldier?.personalNumber, soldier).then(mutateUserWithToken).catch()
         }
 
-        login(soldier)
     }
 
     return (

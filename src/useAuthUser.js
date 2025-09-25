@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {auth} from "./firebase";
 import axiosClient from "./api/axiosClient";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export function useAuthUser() {
     const [user, setUser] = useState(null);       // user data from backend
@@ -12,6 +13,15 @@ export function useAuthUser() {
 
     const isJobMaster = !!user?.jobs;
 
+    const mutateUserWithToken = async (idToken) => {
+        const res = await axiosClient.get('/Users/me', {
+            headers: {
+                Authorization: `Bearer ${idToken}`,
+            },
+        });
+
+        setUser(res.data);
+    }
     // Listen to Firebase auth state (on login, logout, refresh)
     useEffect(() => {
         const unsubscribe = auth.onIdTokenChanged(async (firebaseUser) => {
@@ -20,14 +30,7 @@ export function useAuthUser() {
                     const idToken = await firebaseUser.getIdToken();
                     setToken(idToken);
 
-                    // Fetch user data from backend
-                    const res = await axiosClient.get('/users/me', {
-                        headers: {
-                            Authorization: `Bearer ${idToken}`,
-                        },
-                    });
-
-                    setUser(res.data);
+                    await mutateUserWithToken(idToken)
                 } catch (err) {
                     console.error('Error loading user from backend:', err);
                     await logout(); // force logout if something fails
@@ -44,9 +47,19 @@ export function useAuthUser() {
         return () => unsubscribe();
     }, []);
 
-    const login = (userData) => {
-        // Optional: manually set user from backend if needed
-        setUser(userData);
+    const login = async (email, password) => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+            const idToken = await firebaseUser.getIdToken();
+
+            await mutateUserWithToken(idToken)
+            setToken(idToken);
+            navigate('/');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     const logout = async () => {
@@ -56,6 +69,7 @@ export function useAuthUser() {
         navigate('/login');    // redirect to login
     };
 
+    const mutateUser = async () => await  mutateUserWithToken(token)
     return {
         user,
         token,
@@ -63,5 +77,6 @@ export function useAuthUser() {
         isJobMaster,
         login,
         logout,
+        mutateUserWithToken,
     };
 }

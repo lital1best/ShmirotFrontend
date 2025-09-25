@@ -24,7 +24,6 @@ import {CreateJobMasterApi} from "../../api/JobMasterApi";
 import {CreateSoldierApi} from "../../api/SoldiersApi";
 import {auth} from "../../firebase";
 import {createUserWithEmailAndPassword} from 'firebase/auth';
-import {verifyToken} from "../../api/AuthApi";
 import {useUser} from "../../UserContext";
 
 export function PasswordSetupPage() {
@@ -74,11 +73,7 @@ export function PasswordSetupPage() {
             return;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password)
-        const token = await userCredential.user.getIdToken();
-
-        const res = await verifyToken(token)
-        console.log(res)
+        await createUserWithEmailAndPassword(auth, form.email, form.password)
 
         if (account.role === 'jobMaster') {
             CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(data?.data))

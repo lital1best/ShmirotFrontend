@@ -76,9 +76,9 @@ export function PasswordSetupPage() {
         await createUserWithEmailAndPassword(auth, form.email, form.password)
 
         if (account.role === 'jobMaster') {
-            CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(data?.data))
+            CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(form.email, form.password))
         } else {
-            CreateSoldierApi(account).catch(err => console.log(err)).then(data => login(data?.data))
+            CreateSoldierApi(account).catch(err => console.log(err)).then(data => login(form.email, form.password))
         }
     };
 

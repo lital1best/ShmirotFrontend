@@ -13,7 +13,7 @@ export function useAuthUser() {
 
     const isJobMaster = !!user?.jobs;
 
-    const mutateUserWithToken = async (idToken) => {
+    const mutateUserWithToken = async (idToken = token) => {
         const res = await axiosClient.get('/Users/me', {
             headers: {
                 Authorization: `Bearer ${idToken}`,
@@ -69,7 +69,6 @@ export function useAuthUser() {
         navigate('/login');    // redirect to login
     };
 
-    const mutateUser = async () => await  mutateUserWithToken(token)
     return {
         user,
         token,

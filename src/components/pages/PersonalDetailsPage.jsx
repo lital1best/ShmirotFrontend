@@ -22,7 +22,7 @@ export function PersonalDetailsPage({currentTab}) {
         e.preventDefault()
 
         if (isJobMaster) {
-            EditJobMasterApi(soldier.personalNumber, soldier).then(mutateUserWithToken).catch()
+            EditJobMasterApi(soldier?.personalNumber, soldier).then(mutateUserWithToken).catch()
         }
         else{
             EditSoldierApi(soldier?.personalNumber, soldier).then(mutateUserWithToken).catch()

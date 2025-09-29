@@ -19,8 +19,6 @@ import {
     Title,
     TitleWrap
 } from "../CommonStyles";
-import {GetJobMasterByPersonalNumber} from "../../api/JobMasterApi";
-import {GetSoldierByPersonalNumber} from "../../api/SoldiersApi";
 import {useNavigate} from "react-router-dom";
 import {useUser} from "../../UserContext";
 

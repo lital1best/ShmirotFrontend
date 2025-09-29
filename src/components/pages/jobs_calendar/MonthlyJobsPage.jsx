@@ -13,6 +13,7 @@ import {JobCalendarMark} from "./JobCalendarMark";
 import {SubmitJobsAssignment} from "../../../api/JobsApi";
 import {SoldiersListForEdit} from "./SoldiersListForEdit";
 import {useUser} from "../../../UserContext";
+import dayjs from "dayjs";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -35,7 +36,6 @@ export default function MonthlyJobsPage() {
         data: jobs,
         mutate: mutateJobs
     } = useSWR(swrKey);
-
     const {monthLabel, leadingBlanks, monthDays, trailingBlanks} = useMemo(
         () => buildMonthView(currentMonth),
         [currentMonth]
@@ -53,6 +53,7 @@ export default function MonthlyJobsPage() {
     };
 
     const startAddFor = (dateKey) => {
+        console.log(dateKey)
         setSelectedDate(dateKey);
         setShowAddDialog(true);
     };
@@ -116,7 +117,7 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`lead-${i}`}/>
             ))}
             {monthDays?.map((day) => {
-                const key = day.date.toISOString().slice(0, 10);
+                const key = dayjs(day.date).format("YYYY-MM-DD");
                 const jobsThisDay = Array.isArray(jobs) ? jobs?.filter(j => j.date === key) : [];
 
                 return (

@@ -9,6 +9,6 @@ export const EditSoldierConstrain = (reason, constrainId) => axiosClient.put(CON
     headers: {
         'Content-Type': 'application/json'
     }
-})
+}) // headers here are required
 
 export const DeleteSoldierConstrain = (constrainId) => axiosClient.delete(CONSTRAINTS_BASE_URL + constrainId);

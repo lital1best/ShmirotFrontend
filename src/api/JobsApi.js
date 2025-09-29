@@ -2,10 +2,7 @@ import axiosClient from '../api/axiosClient';
 
 const JOBS_BASE_URL = '/Jobs';
 
-export const createJob = (job) => axiosClient.post(JOBS_BASE_URL, job, {headers: {
-        'accept': 'text/plain',
-        'Content-Type': 'application/json'
-    }})
+export const createJob = (job) => axiosClient.post(JOBS_BASE_URL, job)
 
 export const editJob = (job, jobId) => axiosClient.put(`${JOBS_BASE_URL}/${jobId}`, job)
 

@@ -6,9 +6,9 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {createJob, deleteJob, editJob} from "../../../api/JobsApi";
 import useSWR from "swr";
 import {
-    CreateSoldierConstrain,
-    DeleteSoldierConstrain,
-    EditSoldierConstrain,
+    CreateSoldierConstraint,
+    DeleteSoldierConstraint,
+    EditSoldierConstraint,
     GET_CONSTRAINTS_BY_JOB_ID_URL
 } from "../../../api/SoldiersConstrainsApi";
 import {SelectExemptions} from "../../SelectExemptions";
@@ -82,10 +82,10 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
 
         else{
             if (!!userConstraint){
-                EditSoldierConstrain(constraintReason, userConstraint?.id).then(handleCloseDialog).catch()
+                EditSoldierConstraint(constraintReason, userConstraint?.id).then(handleCloseDialog).catch()
             }
             else {
-                CreateSoldierConstrain({
+                CreateSoldierConstraint({
                     soldierPersonalNumber: user.personalNumber,
                     jobId: selectedJob?.id,
                     reason: constraintReason
@@ -171,7 +171,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                             </div>
                         </FormControl>
                     : <FormControl fullWidth>
-                            <Label>Constrain reason</Label>
+                            <Label>Constraint reason</Label>
                             <Input
                                 value={constraintReason}
                                 onChange={e => setConstraintReason(e.target.value)}
@@ -188,7 +188,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     }
                     {
                         !!selectedJob && !isJobMaster && userConstraint && userConstraint?.id &&
-                        <Button type="button" onClick={() => DeleteSoldierConstrain(userConstraint.id).then(handleCloseDialog)}>Delete
+                        <Button type="button" onClick={() => DeleteSoldierConstraint(userConstraint.id).then(handleCloseDialog)}>Delete
                             constrain</Button>
                     }
                     { isJobMaster && <Button type="submit" $active>{!!selectedJob ? "Edit job" : "Add a new job"}</Button>}

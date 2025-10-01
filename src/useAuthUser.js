@@ -52,9 +52,9 @@ export function useAuthUser() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
             const idToken = await firebaseUser.getIdToken();
+            setToken(idToken);
 
             await mutateUserWithToken(idToken)
-            setToken(idToken);
             navigate('/');
         } catch (err) {
             console.error(err);

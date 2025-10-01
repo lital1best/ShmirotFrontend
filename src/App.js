@@ -13,11 +13,11 @@ function App() {
         <GlobalStyle/>
         <ThemeProvider theme={MuiTheme}>
             <CssBaseline/>
-            <SWRConfig value={{refreshInterval: 5000, fetcher: (url) => axiosClient.get(url).then(res => res.data)}}>
                 <UserProvider>
-                    <AppRoutes/>
+                    <SWRConfig value={{refreshInterval: 5000, fetcher: (url) => axiosClient.get(url).then(res => res.data)}}>
+                        <AppRoutes/>
+                    </SWRConfig>
                 </UserProvider>
-            </SWRConfig>
         </ThemeProvider>
     </BrowserRouter>
 }

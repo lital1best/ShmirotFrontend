@@ -211,7 +211,7 @@ export function SignUpPage() {
                                 <JobMasterSelect
                                     id="jobMasterPersonalNumber"
                                     value={form.jobMasterPersonalNumber}
-                                    options={!!form.unit ? jobMasters.filter((jb) => jb.unit === form.unit) : jobMasters}
+                                    options={!!form.unit ? jobMasters?.filter((jb) => jb.unit === form.unit) : jobMasters}
                                     onChange={onSelectJobMaster}
                                     placeholder="Select a Job Master..."
                                     unit={form.unit}

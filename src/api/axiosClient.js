@@ -1,8 +1,10 @@
 import axios from 'axios';
-import { auth } from '../firebase';
+import {auth} from '../firebase';
+import {SnackbarUtils} from "../providers/SnackbarUtils";
 
+export const BASE_URL = 'http://localhost:5038/api'
 const axiosClient = axios.create({
-    baseURL: 'http://localhost:5038/api',
+    baseURL: BASE_URL,
 });
 
 axiosClient.interceptors.request.use(async (config) => {
@@ -12,8 +14,22 @@ axiosClient.interceptors.request.use(async (config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-}, error => {
-    return Promise.reject(error);
-});
+},
+    (response) => response,
+    (error) => Promise.reject(error)
+);
 
+axiosClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        SnackbarUtils.show(error, 'error');
+
+        if (auth.currentUser && error.config?.meta?.rollbackUserOnFail) {
+            auth.currentUser.delete().then().catch();
+            return Promise.reject(error);
+        }
+
+        console.log("Axios interceptor got an error ", error);
+    }
+);
 export default axiosClient;

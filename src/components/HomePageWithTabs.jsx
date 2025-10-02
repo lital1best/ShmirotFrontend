@@ -5,7 +5,7 @@ import MonthlyJobsPage from "./pages/jobs_calendar/MonthlyJobsPage";
 import {useNavigate} from "react-router-dom";
 import {PersonalDetailsPage} from "./pages/PersonalDetailsPage";
 import {ScoreBoard} from "./pages/ScoreBoard";
-import {useUser} from "../UserContext";
+import {useUser} from "../providers/UserProvider";
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');

@@ -6,13 +6,13 @@ import useSWR from "swr";
 import {
     GET_SOLDIERS_ORDERED_BY_SCORE_URL,
     JOB_MASTER_JOBS_FOR_MONTH_URL,
-    SuggestJobsForMonthApi
+    suggestJobsForMonthApi
 } from "../../../api/JobMasterApi";
 import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
 import {JobCalendarMark} from "./JobCalendarMark";
-import {SubmitJobsAssignment} from "../../../api/JobsApi";
+import {submitJobsAssignment} from "../../../api/JobsApi";
 import {SoldiersListForEdit} from "./SoldiersListForEdit";
-import {useUser} from "../../../UserContext";
+import {useUser} from "../../../providers/UserProvider";
 import dayjs from "dayjs";
 
 export default function MonthlyJobsPage() {
@@ -53,7 +53,6 @@ export default function MonthlyJobsPage() {
     };
 
     const startAddFor = (dateKey) => {
-        console.log(dateKey)
         setSelectedDate(dateKey);
         setShowAddDialog(true);
     };
@@ -69,7 +68,7 @@ export default function MonthlyJobsPage() {
     };
 
     const onSuggestClick = async () => {
-        const suggestionsData = await SuggestJobsForMonthApi(user.personalNumber, currentMonth.getMonth() + 1, currentMonth.getFullYear());
+        const suggestionsData = await suggestJobsForMonthApi(user.personalNumber, currentMonth.getMonth() + 1, currentMonth.getFullYear());
         const suggestionsDict = {}
         suggestionsData.data.forEach(suggestion => {
             suggestionsDict[suggestion.jobId] = suggestion.soldierPersonalNumber
@@ -80,7 +79,7 @@ export default function MonthlyJobsPage() {
 
     const submitSuggestions = async () => {
         const assignmentList = Object.entries(suggestionsMap).map(([key, value] )=> ({jobID :key, soldierPersonalNumber: value}))
-        SubmitJobsAssignment(assignmentList).then(onDialogClose).catch(console.error)
+        submitJobsAssignment(assignmentList).then(onDialogClose)
     }
 
 

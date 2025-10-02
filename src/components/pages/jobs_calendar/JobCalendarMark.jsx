@@ -4,7 +4,7 @@ import {Tooltip} from "@mui/material";
 import {EXEMPTIONS_OPTIONS, SERVICE_STATUSES} from "../../../consts";
 import React, {useEffect} from "react";
 import styled from "styled-components";
-import {useUser} from "../../../UserContext";
+import {useUser} from "../../../providers/UserProvider";
 
 export function JobCalendarMark({job, onClick, selectedJob}) {
     const {user, isJobMaster} = useUser()

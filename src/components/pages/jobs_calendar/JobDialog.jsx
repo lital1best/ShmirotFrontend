@@ -6,14 +6,14 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {createJob, deleteJob, editJob} from "../../../api/JobsApi";
 import useSWR from "swr";
 import {
-    CreateSoldierConstraint,
-    DeleteSoldierConstraint,
-    EditSoldierConstraint,
+    createSoldierConstraint,
+    deleteSoldierConstraint,
+    editSoldierConstraint,
     GET_CONSTRAINTS_BY_JOB_ID_URL
 } from "../../../api/SoldiersConstrainsApi";
 import {SelectExemptions} from "../../SelectExemptions";
 import {SelectServiceStatus} from "../../SelectServiceStatus";
-import {useUser} from "../../../UserContext";
+import {useUser} from "../../../providers/UserProvider";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, soldiersByScore}) {
@@ -28,7 +28,6 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
     const [constraintReason ,setConstraintReason] = useState('')
 
     const {user} = useUser();
-
     const eligibleSoldiers = soldiersByScore?.filter(s => canSoldierDoJob(s, jobForm))
 
     const {data: jobConstraints, mutate: mutateConstraints} = useSWR(!!selectedJob && GET_CONSTRAINTS_BY_JOB_ID_URL(selectedJob?.id))
@@ -70,26 +69,26 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
             if (!!selectedJob) {
                 editJob({
                     ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
-                }, selectedJob.id).then(handleCloseDialog).catch()
+                }, selectedJob.id).then(handleCloseDialog)
             } else {
                 createJob({
                     ...jobForm, personalNumber: jobForm?.soldier?.personalNumber,
                     date: selectedDate,
                     jobMasterPersonalNumber: user?.personalNumber,
-                }).then(handleCloseDialog).catch()
+                }).then(handleCloseDialog)
             }
         }
 
         else{
             if (!!userConstraint){
-                EditSoldierConstraint(constraintReason, userConstraint?.id).then(handleCloseDialog).catch()
+                editSoldierConstraint(constraintReason, userConstraint?.id).then(handleCloseDialog)
             }
             else {
-                CreateSoldierConstraint({
+                createSoldierConstraint({
                     soldierPersonalNumber: user.personalNumber,
                     jobId: selectedJob?.id,
                     reason: constraintReason
-                }).then(handleCloseDialog).catch()
+                }).then(handleCloseDialog)
             }
         }
     };
@@ -188,7 +187,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     }
                     {
                         !!selectedJob && !isJobMaster && userConstraint && userConstraint?.id &&
-                        <Button type="button" onClick={() => DeleteSoldierConstraint(userConstraint.id).then(handleCloseDialog)}>Delete
+                        <Button type="button" onClick={() => deleteSoldierConstraint(userConstraint.id).then(handleCloseDialog)}>Delete
                             constrain</Button>
                     }
                     { isJobMaster && <Button type="submit" $active>{!!selectedJob ? "Edit job" : "Add a new job"}</Button>}

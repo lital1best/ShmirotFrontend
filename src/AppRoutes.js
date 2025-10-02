@@ -1,8 +1,8 @@
 import {Route, Routes} from "react-router-dom";
 import HomePage from "./components/HomePageWithTabs";
-import {LoginPage} from "./components/Dialogs/LoginPage";
-import {SignUpPage} from "./components/Dialogs/SignUpPage";
-import {PasswordSetupPage} from "./components/Dialogs/PasswordSetupPage";
+import {LoginPage} from "./components/dialogs/LoginPage";
+import {SignUpPage} from "./components/dialogs/SignUpPage";
+import {PasswordSetupPage} from "./components/dialogs/PasswordSetupPage";
 import React from "react";
 
 export const AppRoutes = () => {

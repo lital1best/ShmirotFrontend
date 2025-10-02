@@ -3,9 +3,9 @@ import {Button, TextField} from "@mui/material";
 import styled from "styled-components";
 import {SelectExemptions} from "../SelectExemptions";
 import {SelectServiceStatus} from "../SelectServiceStatus";
-import {EditJobMasterApi} from "../../api/JobMasterApi";
-import {EditSoldierApi} from "../../api/SoldiersApi";
-import {useUser} from "../../UserContext";
+import {editJobMasterApi} from "../../api/JobMasterApi";
+import {editSoldierApi} from "../../api/SoldiersApi";
+import {useUser} from "../../providers/UserProvider";
 
 export function PersonalDetailsPage({currentTab}) {
     const {user, isJobMaster, mutateUserWithToken} = useUser()
@@ -22,10 +22,10 @@ export function PersonalDetailsPage({currentTab}) {
         e.preventDefault()
 
         if (isJobMaster) {
-            EditJobMasterApi(soldier?.personalNumber, soldier).then(mutateUserWithToken).catch()
+            editJobMasterApi(soldier?.personalNumber, soldier).then(mutateUserWithToken)
         }
         else{
-            EditSoldierApi(soldier?.personalNumber, soldier).then(mutateUserWithToken).catch()
+            editSoldierApi(soldier?.personalNumber, soldier).then(mutateUserWithToken)
         }
 
     }

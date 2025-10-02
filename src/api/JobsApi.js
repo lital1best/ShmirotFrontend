@@ -8,4 +8,4 @@ export const editJob = (job, jobId) => axiosClient.put(`${JOBS_BASE_URL}/${jobId
 
 export const deleteJob = (jobId) => axiosClient.delete(`${JOBS_BASE_URL}/${jobId}`)
 
-export const SubmitJobsAssignment = (jobs) => axiosClient.post(`${JOBS_BASE_URL}/assign-jobs`, jobs)
+export const submitJobsAssignment = (jobs) => axiosClient.post(`${JOBS_BASE_URL}/assign-jobs`, jobs)

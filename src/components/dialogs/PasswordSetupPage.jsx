@@ -20,16 +20,18 @@ import {
     Title,
     TitleWrap
 } from "../CommonStyles";
-import {CreateJobMasterApi} from "../../api/JobMasterApi";
-import {CreateSoldierApi} from "../../api/SoldiersApi";
+import {createJobMasterApi} from "../../api/JobMasterApi";
+import {createSoldierApi} from "../../api/SoldiersApi";
 import {auth} from "../../firebase";
 import {createUserWithEmailAndPassword} from 'firebase/auth';
-import {useUser} from "../../UserContext";
+import {useUser} from "../../providers/UserProvider";
+import {useSnackbar} from "../../providers/SnackbarProvider";
 
 export function PasswordSetupPage() {
     const navigate = useNavigate();
     const {state} = useLocation();
-    const {login} = useUser();
+    const {login, setCreateUserFail} = useUser();
+    const { showMessage } = useSnackbar();
 
     const account = state?.account;
 
@@ -69,17 +71,24 @@ export function PasswordSetupPage() {
 
         if (errors.length) {
             // eslint-disable-next-line no-alert
-            alert(errors.join('\n'));
+            showMessage(errors.join('\n'));
             return;
         }
 
-        await createUserWithEmailAndPassword(auth, form.email, form.password)
+        setCreateUserFail(false);
 
-        if (account.role === 'jobMaster') {
-            CreateJobMasterApi(account).catch(err => console.log(err)).then(data => login(form.email, form.password))
-        } else {
-            CreateSoldierApi(account).catch(err => console.log(err)).then(data => login(form.email, form.password))
-        }
+        createUserWithEmailAndPassword(auth, form.email, form.password).then(() => {
+            const apiCall =
+                account.role === "jobMaster"
+                    ? createJobMasterApi(account)
+                    : createSoldierApi(account);
+            return apiCall.then(() => {
+                login(form.email, form.password)
+            }).catch(() => {
+                console.log("Create user fail")
+                setCreateUserFail(true)
+            })
+        }).catch(showMessage);
     };
 
     return (

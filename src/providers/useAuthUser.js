@@ -1,38 +1,49 @@
 // src/context/useAuthUser.js
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {auth} from "./firebase";
-import axiosClient from "./api/axiosClient";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {auth} from "../firebase";
+import {BASE_URL} from "../api/axiosClient";
+import {signInWithEmailAndPassword} from "firebase/auth";
+import axios from "axios";
+import {useSnackbar} from "./SnackbarProvider";
 
 export function useAuthUser() {
     const [user, setUser] = useState(null);       // user data from backend
     const [token, setToken] = useState(null);     // Firebase ID token
     const [loading, setLoading] = useState(true); // to know when auth is initializing
+    const [createUserFail, setCreateUserFail] = useState(false);
+
     const navigate = useNavigate();
+    const {showMessage} = useSnackbar();
 
     const isJobMaster = !!user?.jobs;
 
-    const mutateUserWithToken = async (idToken = token) => {
-        const res = await axiosClient.get('/Users/me', {
-            headers: {
-                Authorization: `Bearer ${idToken}`,
-            },
-        });
-
-        setUser(res.data);
+    const mutateUserWithToken =  (idToken = token) => {
+        if (!!idToken && !createUserFail) {
+            axios.get(`${BASE_URL}/Users/me`, {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            }).then((res) => setUser(res?.data)).catch(() => {})
+        }
     }
+
+
     // Listen to Firebase auth state (on login, logout, refresh)
     useEffect(() => {
+        if (createUserFail) {
+            setCreateUserFail(false);
+            return
+        }
+
         const unsubscribe = auth.onIdTokenChanged(async (firebaseUser) => {
             if (firebaseUser) {
                 try {
                     const idToken = await firebaseUser.getIdToken();
                     setToken(idToken);
-
-                    await mutateUserWithToken(idToken)
+                    mutateUserWithToken(idToken);
                 } catch (err) {
-                    console.error('Error loading user from backend:', err);
+                    showMessage(err);
                     await logout(); // force logout if something fails
                 }
             } else {
@@ -52,13 +63,11 @@ export function useAuthUser() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
             const idToken = await firebaseUser.getIdToken();
-            setToken(idToken);
-
-            await mutateUserWithToken(idToken)
+            setToken(idToken)
             navigate('/');
+            setCreateUserFail(false);
         } catch (err) {
-            console.error(err);
-            throw err;
+            showMessage(err.message);
         }
     };
 
@@ -67,6 +76,7 @@ export function useAuthUser() {
         setToken(null);
         await auth.signOut();  // logs out Firebase session
         navigate('/login');    // redirect to login
+        setCreateUserFail(false);
     };
 
     return {
@@ -77,5 +87,6 @@ export function useAuthUser() {
         login,
         logout,
         mutateUserWithToken,
+        setCreateUserFail,
     };
 }

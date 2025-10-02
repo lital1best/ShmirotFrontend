@@ -1,5 +1,4 @@
-// Custom dropdown for Job Masters
-import React, {useRef, useState} from "react";
+import React, {useState} from "react";
 import {
     Caret,
     DropdownButton,
@@ -12,7 +11,7 @@ import {
 } from "../CommonStyles";
 import {Dropdown} from "@mui/joy";
 
-export function JobMasterSelect({id, value, options, onChange, placeholder}) {
+export function JobMasterSelect({value, options, onChange, placeholder}) {
     const [open, setOpen] = useState(false);
     const selected = options.find(o => String(o.personalNumber) === String(value));
 

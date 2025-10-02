@@ -20,7 +20,8 @@ import {
     TitleWrap
 } from "../CommonStyles";
 import {useNavigate} from "react-router-dom";
-import {useUser} from "../../UserContext";
+import {useUser} from "../../providers/UserProvider";
+import {useSnackbar} from "../../providers/SnackbarProvider";
 
 
 export function LoginPage() {

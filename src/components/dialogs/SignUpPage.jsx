@@ -174,7 +174,6 @@ export function SignUpPage() {
                         </InputWrap>
                     </Field>
 
-                    {/* Re-added account type selection */}
                     <Field>
                         <Label>Account Type</Label>
                         <RoleWrap>
@@ -209,7 +208,6 @@ export function SignUpPage() {
                             <InputWrap>
                                 <Icon>👤</Icon>
                                 <JobMasterSelect
-                                    id="jobMasterPersonalNumber"
                                     value={form.jobMasterPersonalNumber}
                                     options={!!form.unit ? jobMasters?.filter((jb) => jb.unit === form.unit) : jobMasters}
                                     onChange={onSelectJobMaster}

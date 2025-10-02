@@ -20,12 +20,11 @@ import {
     Title,
     TitleWrap
 } from "../CommonStyles";
-import {createJobMasterApi} from "../../api/JobMasterApi";
-import {createSoldierApi} from "../../api/SoldiersApi";
 import {auth} from "../../firebase";
 import {createUserWithEmailAndPassword} from 'firebase/auth';
 import {useUser} from "../../providers/UserProvider";
 import {useSnackbar} from "../../providers/SnackbarProvider";
+import {createUser} from "../../api/usersApi";
 
 export function PasswordSetupPage() {
     const navigate = useNavigate();
@@ -78,14 +77,9 @@ export function PasswordSetupPage() {
         setCreateUserFail(false);
 
         createUserWithEmailAndPassword(auth, form.email, form.password).then(() => {
-            const apiCall =
-                account.role === "jobMaster"
-                    ? createJobMasterApi(account)
-                    : createSoldierApi(account);
-            return apiCall.then(() => {
+            return createUser(account).then(() => {
                 login(form.email, form.password)
             }).catch(() => {
-                console.log("Create user fail")
                 setCreateUserFail(true)
             })
         }).catch(showMessage);

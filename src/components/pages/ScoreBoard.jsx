@@ -26,6 +26,7 @@ export function ScoreBoard({currentTab}) {
                 </ScoreDetails>
             </ScoreItem>
         ))}
+        {(!soldiers?.length) && <span> There are no soldiers registered for you </span>}
     </ScoreList>
 }
 

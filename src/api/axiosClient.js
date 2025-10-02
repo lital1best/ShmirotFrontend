@@ -22,9 +22,12 @@ axiosClient.interceptors.request.use(async (config) => {
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
+        if (error.config?.dismissError) {
+            return;
+        }
         SnackbarUtils.show(error, 'error');
 
-        if (auth.currentUser && error.config?.meta?.rollbackUserOnFail) {
+        if (auth.currentUser && error.config?.rollbackUserOnFail) {
             auth.currentUser.delete().then().catch();
             return Promise.reject(error);
         }

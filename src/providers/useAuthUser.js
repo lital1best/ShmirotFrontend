@@ -6,6 +6,7 @@ import {BASE_URL} from "../api/axiosClient";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import axios from "axios";
 import {useSnackbar} from "./SnackbarProvider";
+import {getUserInfo} from "../api/usersApi";
 
 export function useAuthUser() {
     const [user, setUser] = useState(null);       // user data from backend
@@ -20,11 +21,7 @@ export function useAuthUser() {
 
     const mutateUserWithToken =  (idToken = token) => {
         if (!!idToken && !createUserFail) {
-            axios.get(`${BASE_URL}/Users/me`, {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
-            }).then((res) => setUser(res?.data)).catch(() => {})
+            getUserInfo().then((res) => setUser(res?.data))
         }
     }
 

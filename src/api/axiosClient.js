@@ -3,6 +3,7 @@ import {auth} from '../firebase';
 import {SnackbarUtils} from "../providers/SnackbarUtils";
 
 export const BASE_URL = 'http://localhost:5038/api'
+
 const axiosClient = axios.create({
     baseURL: BASE_URL,
 });

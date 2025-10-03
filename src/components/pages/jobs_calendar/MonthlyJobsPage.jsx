@@ -163,9 +163,11 @@ export default function MonthlyJobsPage() {
             ))}
         </DayGrid>
         {selectedJob && isEditMode && <SoldiersListForEdit suggestionsMap={suggestionsMap} selectedJob={selectedJob} soldiersByScore={soldiersByScore} setSuggestionsMap={setSuggestionsMap}/>}
-        <JobDialog isJobMaster={isJobMaster}
-                   isOpen={showAddDialog && !isEditMode} onClose={onDialogClose} selectedDate={selectedDate}
-                   selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
+        { showAddDialog && !isEditMode &&
+            <JobDialog isJobMaster={isJobMaster}
+                    isOpen={showAddDialog && !isEditMode} onClose={onDialogClose} selectedDate={selectedDate}
+                    selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
+        }
 
     </CalendarContainer>
 }

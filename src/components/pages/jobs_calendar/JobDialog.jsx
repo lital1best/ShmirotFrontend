@@ -39,24 +39,23 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
         }
     }, [jobConstraints])
 
-    useEffect(() => {
-        if (!!selectedJob){
-            setJobForm(selectedJob)
-        }
-    }, [!!selectedJob])
+    useEffect(() => !!selectedJob? setJobForm(selectedJob) : resetJobForm(), [selectedJob])
 
+    const resetJobForm = () =>{
+        setJobForm({
+            description: '',
+            location: '',
+            serviceStatus: 0,
+            exemptions: [],
+            score: 1,
+            soldier: null,
+            jobMasterPersonalNumber: 0
+        });
+    }
 
     const handleCloseDialog = () => {
         onClose().then(() => {
-            setJobForm({
-                description: '',
-                location: '',
-                serviceStatus: 0,
-                exemptions: [],
-                score: 1,
-                soldier: null,
-                jobMasterPersonalNumber: 0
-            });
+            resetJobForm()
             mutateConstraints().then()
             setConstraintReason('')
         });
@@ -129,7 +128,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     <Label>Score</Label>
                     <Input
                         type="number"
-                        value={jobForm.score}
+                        value={jobForm?.score}
                         required
                         readOnly={!isJobMaster}
                         onChange={e => setJobForm({...jobForm, score: parseInt(e.target.value)})}
@@ -159,7 +158,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                                         ))
                                     }
                                 </Select>
-                                {jobForm.soldier &&
+                                {jobForm?.soldier &&
                                     <Button
                                         type="button"
                                         onClick={() => setJobForm({...jobForm, soldier: null, personalNumber: null})}
@@ -182,7 +181,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     <Button type="button" onClick={handleCloseDialog}>Cancel</Button>
                     {
                         !!selectedJob && isJobMaster &&
-                        <Button type="button" onClick={() => deleteJob(selectedJob.id).then(handleCloseDialog)}>Delete
+                        <Button type="button" onClick={() => deleteJob(selectedJob?.id).then(handleCloseDialog)}>Delete
                             job</Button>
                     }
                     {

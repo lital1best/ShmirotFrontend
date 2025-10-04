@@ -12,9 +12,9 @@ export function SelectServiceStatus({state, setState, isReadonly = false}) {
             }
 
             return newState;
-
         })
     }
+
     return <FormControl required>
         <InputLabel>Service Status</InputLabel>
         <Select  value={state?.serviceStatus} defaultValue={state.serviceStatus}

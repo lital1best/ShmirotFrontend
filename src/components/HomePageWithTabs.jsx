@@ -50,8 +50,7 @@ export default function HomePage() {
                     <Button onClick={logout}>Logout</Button>
                 </Header>
 
-                <Panel hidden={activeTab !== 'monthly'}
-                >
+                <Panel hidden={activeTab !== 'monthly'}>
                     <MonthlyJobsPage/>
                 </Panel>
                 <Panel hidden={activeTab !== 'score'}>
@@ -70,9 +69,9 @@ export default function HomePage() {
 const Screen = styled.main`
     display: flex;
     flex-direction: row;
-    min-height: 100vh;
-    padding: 32px 0 20px 20px;
-    gap: 16px;
+    padding: 2vh;
+    gap: 3vh;
+    height: 100vh;
 `;
 
 const Tabs = styled.div`
@@ -86,6 +85,7 @@ const Tabs = styled.div`
     backdrop-filter: blur(2px);
     height: fit-content;
     width: 160px;
+    
 `;
 
 const StyledTabButton = styled(Button)`
@@ -109,12 +109,16 @@ const StyledTabButton = styled(Button)`
 
 const Container = styled.div`
     width: 90%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--army-green-dark);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(2px);
     overflow: hidden;
+    max-height: 100%;
 `;
 
 const Header = styled.header`
@@ -134,8 +138,8 @@ const Panel = styled.section`
     flex: 1;
     background: rgba(168, 159, 123, 0.08);
     padding: 24px;
-    height: calc(100vh - 180px);
     overflow-y: auto;
+    height: calc(100% - 80px);
 
     &::-webkit-scrollbar {
         width: 8px;

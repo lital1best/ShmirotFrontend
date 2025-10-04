@@ -16,8 +16,9 @@ export function ScoreBoard({currentTab}) {
 
     return <ScoreList>
         {soldiers?.toReversed().map((soldier) => (
-            <ScoreItem key={soldier.personalNumber}>
-                <ScoreName>{soldier.firstName} {soldier.lastName}</ScoreName>
+            <ScoreItem key={soldier.personalNumber}
+                       highlighted={!isJobMaster && soldier.personalNumber === user?.personalNumber}>
+            <ScoreName>{soldier.firstName} {soldier.lastName}</ScoreName>
                 <ScoreDetails>
                     <span>Score: {soldier.score}</span>
                     <span>Rank: {soldier.rank}</span>
@@ -39,7 +40,7 @@ const ScoreList = styled.div`
 
 const ScoreItem = styled.div`
     padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: ${props => props.highlighted ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)'};
     border-radius: 8px;
     border: 1px solid var(--army-green-dark);
 `;

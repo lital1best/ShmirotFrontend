@@ -14,6 +14,7 @@ import {submitJobsAssignment} from "../../../api/JobsApi";
 import {SoldiersListForEdit} from "./SoldiersListForEdit";
 import {useUser} from "../../../providers/UserProvider";
 import dayjs from "dayjs";
+import {ColorInfo} from "./ColorInfo";
 
 export default function MonthlyJobsPage() {
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -28,7 +29,10 @@ export default function MonthlyJobsPage() {
         return new Date(d.getFullYear(), d.getMonth(), 1);
     });
 
-    const {data: soldiersByScore, mutate: mutateSoldiers} = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
+    const {
+        data: soldiersByScore,
+        mutate: mutateSoldiers
+    } = useSWR(GET_SOLDIERS_ORDERED_BY_SCORE_URL(user?.personalNumber))
 
     const getMonthJobsUrlFunction = isJobMaster ? JOB_MASTER_JOBS_FOR_MONTH_URL : SOLDIERS_JOBS_FOR_MONTH_URL
     const swrKey = getMonthJobsUrlFunction(user?.personalNumber, currentMonth?.getMonth() + 1, currentMonth?.getFullYear());
@@ -78,7 +82,10 @@ export default function MonthlyJobsPage() {
     }
 
     const submitSuggestions = async () => {
-        const assignmentList = Object.entries(suggestionsMap).map(([key, value] )=> ({jobID :key, soldierPersonalNumber: value}))
+        const assignmentList = Object.entries(suggestionsMap).map(([key, value]) => ({
+            jobID: key,
+            soldierPersonalNumber: value
+        }))
         submitJobsAssignment(assignmentList).then(onDialogClose)
     }
 
@@ -87,13 +94,18 @@ export default function MonthlyJobsPage() {
         <CalendarHeader>
             <HeaderLeft>
                 <HeaderTitle>{monthLabel}</HeaderTitle>
-                <HeaderSub>Assign and review monthly shmirot</HeaderSub>
+                <HeaderSub>
+                    {isJobMaster
+                        ? "Assign and review monthly jobs"
+                        : "Review monthly jobs and submit constraints"}
+                </HeaderSub>
             </HeaderLeft>
+            <ColorInfo isJobMaster={isJobMaster}/>
             <HeaderActions>
                 {isEditMode ? (
                     <>
                         <EditModeIndicator>Edit Mode</EditModeIndicator>
-                        <Button onClick={submitSuggestions}>Submit Suggestions</Button>
+                        <Button onClick={submitSuggestions}> Submit</Button>
                     </>
                 ) : (
                     <Button hidden={!isJobMaster} onClick={onSuggestClick}>Suggest Assigns</Button>
@@ -162,11 +174,13 @@ export default function MonthlyJobsPage() {
                 <EmptyCell key={`trail-${i}`}/>
             ))}
         </DayGrid>
-        {selectedJob && isEditMode && <SoldiersListForEdit suggestionsMap={suggestionsMap} selectedJob={selectedJob} soldiersByScore={soldiersByScore} setSuggestionsMap={setSuggestionsMap}/>}
-        { showAddDialog && !isEditMode &&
+        {selectedJob && isEditMode &&
+            <SoldiersListForEdit suggestionsMap={suggestionsMap} selectedJob={selectedJob}
+                                 soldiersByScore={soldiersByScore} setSuggestionsMap={setSuggestionsMap}/>}
+        {showAddDialog && !isEditMode &&
             <JobDialog isJobMaster={isJobMaster}
-                    isOpen={showAddDialog && !isEditMode} onClose={onDialogClose} selectedDate={selectedDate}
-                    selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
+                       isOpen={showAddDialog && !isEditMode} onClose={onDialogClose} selectedDate={selectedDate}
+                       selectedJob={selectedJob} soldiersByScore={soldiersByScore}/>
         }
 
     </CalendarContainer>
@@ -213,11 +227,13 @@ const CalendarHeader = styled.header`
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--army-green-dark);
     border-radius: 10px;
+    position: relative; /* so legend can be absolutely positioned */
 `;
 
 const HeaderLeft = styled.div`
     display: flex;
     flex-direction: column;
+    gap: 4px;
 `;
 
 export const HeaderTitle = styled.h3`
@@ -231,6 +247,7 @@ const HeaderSub = styled.span`
     font-size: 12px;
     opacity: 0.9;
 `;
+
 
 const HeaderActions = styled.div`
     display: flex;

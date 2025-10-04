@@ -43,11 +43,11 @@ const JobPill = styled.div`
     gap: 6px;
     padding: 6px 8px;
     ${(props) => props.isAssigned && `
-    background: rgba(0, 255, 0, 0.2);
+    background: green;
   `}
 
     ${(props) => (props.isJobMaster && !props.isAssigned) && `
-    background: rgba(255, 0, 0, 0.2);
+    background: brown;
   `}
 
     ${(props) => (props.hasConstraint) && `

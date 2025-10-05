@@ -1,7 +1,7 @@
 import {Tooltip} from "@mui/material";
-import WarningIcon from "@mui/icons-material/esm/Warning";
 import {ItemMeta, ItemName} from "../../theme/commonStyles";
 import React from "react";
+import WarningIcon from "@mui/icons-material/Warning";
 
 export const SoldierRow = ({soldier, jobConstraints}) => {
     const soldierConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === soldier.personalNumber);

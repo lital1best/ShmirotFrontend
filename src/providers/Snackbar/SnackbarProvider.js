@@ -27,7 +27,7 @@ export const SnackbarProvider = ({ children }) => {
             msg = msg?.message;
         }
 
-        const id = new Date().getTime() + Math.random(); // unique ID
+        const id = new Date().getTime() + Math.random();
         setMessages((prev) => [...prev, { id, msg, severity: sev }]);
     };
 
@@ -45,7 +45,7 @@ export const SnackbarProvider = ({ children }) => {
                     autoHideDuration={4000}
                     onClose={() => handleClose(id)}
                     anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                    style={{ marginBottom: index * 60 }} // stagger them vertically
+                    style={{ marginBottom: index * 60 }}
                 >
                     <Alert onClose={() => handleClose(id)} severity={severity} sx={{ width: "100%" }}>
                         {msg}

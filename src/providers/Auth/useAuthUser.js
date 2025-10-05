@@ -1,4 +1,3 @@
-// src/context/useAuthUser.js
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {auth} from "./firebase";
@@ -7,9 +6,9 @@ import {useSnackbar} from "../Snackbar/SnackbarProvider";
 import {getUserInfo} from "../../api/usersApi";
 
 export function useAuthUser() {
-    const [user, setUser] = useState(null);       // user data from backend
-    const [token, setToken] = useState(null);     // Firebase ID token
-    const [loading, setLoading] = useState(true); // to know when auth is initializing
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [createUserFail, setCreateUserFail] = useState(false);
 
     const navigate = useNavigate();
@@ -23,7 +22,6 @@ export function useAuthUser() {
         }
     }
 
-    // Listen to Firebase auth state (on login, logout, refresh)
     useEffect(() => {
         if (createUserFail) {
             setCreateUserFail(false);
@@ -38,10 +36,9 @@ export function useAuthUser() {
                     mutateUserWithToken(idToken);
                 } catch (err) {
                     showMessage(err);
-                    await logout(); // force logout if something fails
+                    await logout();
                 }
             } else {
-                // Firebase user is null = logged out
                 setUser(null);
                 setToken(null);
             }
@@ -68,8 +65,8 @@ export function useAuthUser() {
     const logout = async () => {
         setUser(null);
         setToken(null);
-        await auth.signOut();  // logs out Firebase session
-        navigate('/login');    // redirect to login
+        await auth.signOut();
+        navigate('/login');
         setCreateUserFail(false);
     };
 

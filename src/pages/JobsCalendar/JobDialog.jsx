@@ -130,6 +130,7 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                         type="number"
                         value={jobForm?.score}
                         required
+                        min={0}
                         readOnly={!isJobMaster}
                         onChange={e => setJobForm({...jobForm, score: parseInt(e.target.value)})}
                     />

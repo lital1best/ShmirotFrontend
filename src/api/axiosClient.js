@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {auth} from '../firebase';
-import {SnackbarUtils} from "../providers/SnackbarUtils";
+import {auth} from '../providers/Auth/firebase';
+import {SnackbarUtils} from "../providers/Snackbar/SnackbarUtils";
 
 export const BASE_URL = 'http://localhost:5038/api'
 

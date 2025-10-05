@@ -18,10 +18,10 @@ import {
     Subtitle,
     Title,
     TitleWrap
-} from "../CommonStyles";
+} from "../../theme/commonStyles";
 import {useNavigate} from "react-router-dom";
-import {useUser} from "../../providers/UserProvider";
-import {useSnackbar} from "../../providers/SnackbarProvider";
+import {useUser} from "../../providers/Auth/UserProvider";
+import {useSnackbar} from "../../providers/Snackbar/SnackbarProvider";
 
 
 export function LoginPage() {

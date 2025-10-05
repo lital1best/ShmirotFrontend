@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {Button, TextField} from "@mui/material";
 import styled from "styled-components";
-import {SelectExemptions} from "../SelectExemptions";
-import {SelectServiceStatus} from "../SelectServiceStatus";
-import {editJobMasterApi} from "../../api/JobMasterApi";
-import {editSoldierApi} from "../../api/SoldiersApi";
-import {useUser} from "../../providers/UserProvider";
+import {SelectExemptions} from "../components/SelectExemptions";
+import {SelectServiceStatus} from "../components/SelectServiceStatus";
+import {editJobMasterApi} from "../api/jobMasterApi";
+import {editSoldierApi} from "../api/soldiersApi";
+import {useUser} from "../providers/Auth/UserProvider";
 
 export function PersonalDetailsPage({currentTab}) {
     const {user, isJobMaster, mutateUserWithToken} = useUser()

@@ -19,12 +19,12 @@ import {
     Subtitle,
     Title,
     TitleWrap
-} from "../CommonStyles";
-import {auth} from "../../firebase";
+} from "../../../theme/commonStyles";
+import {auth} from "../../../providers/Auth/firebase";
 import {createUserWithEmailAndPassword} from 'firebase/auth';
-import {useUser} from "../../providers/UserProvider";
-import {useSnackbar} from "../../providers/SnackbarProvider";
-import {createUser} from "../../api/usersApi";
+import {useUser} from "../../../providers/Auth/UserProvider";
+import {useSnackbar} from "../../../providers/Snackbar/SnackbarProvider";
+import {createUser} from "../../../api/usersApi";
 
 export function PasswordSetupPage() {
     const navigate = useNavigate();

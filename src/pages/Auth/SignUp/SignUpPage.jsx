@@ -20,11 +20,11 @@ import {
     Subtitle,
     Title,
     TitleWrap
-} from "../CommonStyles";
+} from "../../../theme/commonStyles";
 import useSWR from "swr";
-import {JOB_MASTER_BASE_URL} from "../../api/JobMasterApi";
+import {JOB_MASTER_BASE_URL} from "../../../api/jobMasterApi";
 import {JobMasterSelect} from "./JobMasterSelect";
-import {SelectServiceStatus} from "../SelectServiceStatus";
+import {SelectServiceStatus} from "../../../components/SelectServiceStatus";
 
 export function SignUpPage() {
     const navigate = useNavigate();

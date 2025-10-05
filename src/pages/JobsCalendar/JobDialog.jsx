@@ -1,19 +1,19 @@
-import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../../CommonStyles";
+import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../../theme/commonStyles";
 import React, {useEffect, useState} from "react";
 import {FormControl, InputLabel, MenuItem, Select, Tooltip} from "@mui/material";
 import Modal from '@mui/material/Modal';
 import WarningIcon from '@mui/icons-material/Warning';
-import {createJob, deleteJob, editJob} from "../../../api/JobsApi";
+import {createJob, deleteJob, editJob} from "../../api/jobsApi";
 import useSWR from "swr";
 import {
     createSoldierConstraint,
     deleteSoldierConstraint,
     editSoldierConstraint,
     GET_CONSTRAINTS_BY_JOB_ID_URL
-} from "../../../api/SoldiersConstrainsApi";
-import {SelectExemptions} from "../../SelectExemptions";
-import {SelectServiceStatus} from "../../SelectServiceStatus";
-import {useUser} from "../../../providers/UserProvider";
+} from "../../api/soldiersConstrainsApi";
+import {SelectExemptions} from "../../components/SelectExemptions";
+import {SelectServiceStatus} from "../../components/SelectServiceStatus";
+import {useUser} from "../../providers/Auth/UserProvider";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, soldiersByScore}) {

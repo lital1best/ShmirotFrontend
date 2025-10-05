@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {Button, Subtitle, Title} from "./CommonStyles";
-import MonthlyJobsPage from "./pages/jobs_calendar/MonthlyJobsPage";
+import {Button, Subtitle, Title} from "../theme/commonStyles";
+import MonthlyJobsPage from "./JobsCalendar/MonthlyJobsPage";
 import {useNavigate} from "react-router-dom";
-import {PersonalDetailsPage} from "./pages/PersonalDetailsPage";
-import {ScoreBoard} from "./pages/ScoreBoard";
-import {useUser} from "../providers/UserProvider";
+import {PersonalDetailsPage} from "./PersonalDetailsPage";
+import {ScoreBoard} from "./ScoreBoard";
+import {useUser} from "../providers/Auth/UserProvider";
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState('monthly');

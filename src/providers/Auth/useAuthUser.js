@@ -1,12 +1,10 @@
 // src/context/useAuthUser.js
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {auth} from "../firebase";
-import {BASE_URL} from "../api/axiosClient";
+import {auth} from "./firebase";
 import {signInWithEmailAndPassword} from "firebase/auth";
-import axios from "axios";
-import {useSnackbar} from "./SnackbarProvider";
-import {getUserInfo} from "../api/usersApi";
+import {useSnackbar} from "../Snackbar/SnackbarProvider";
+import {getUserInfo} from "../../api/usersApi";
 
 export function useAuthUser() {
     const [user, setUser] = useState(null);       // user data from backend
@@ -24,7 +22,6 @@ export function useAuthUser() {
             getUserInfo().then((res) => setUser(res?.data))
         }
     }
-
 
     // Listen to Firebase auth state (on login, logout, refresh)
     useEffect(() => {

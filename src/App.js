@@ -1,10 +1,10 @@
 import {BrowserRouter} from 'react-router-dom';
 import React from "react";
 import {CssBaseline, ThemeProvider} from "@mui/material";
-import {MuiTheme} from "./color_themes/mui_theme";
-import {GlobalStyle} from "./color_themes/global_style";
-import {UserProvider} from "./providers/UserProvider";
-import {SnackbarProvider} from "./providers/SnackbarProvider";
+import {MuiTheme} from "./theme/muiTheme";
+import {GlobalStyle} from "./theme/globalStyle";
+import {UserProvider} from "./providers/Auth/UserProvider";
+import {SnackbarProvider} from "./providers/Snackbar/SnackbarProvider";
 import axiosClient from "./api/axiosClient";
 import {AppRoutes} from "./AppRoutes";
 import {SWRConfig} from "swr";

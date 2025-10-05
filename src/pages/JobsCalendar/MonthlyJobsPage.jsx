@@ -1,18 +1,18 @@
 import React, {useMemo, useState} from "react";
 import styled from "styled-components";
-import {Button} from "../../CommonStyles";
+import {Button} from "../../theme/commonStyles";
 import {JobDialog} from "./JobDialog";
 import useSWR from "swr";
 import {
     GET_SOLDIERS_ORDERED_BY_SCORE_URL,
     JOB_MASTER_JOBS_FOR_MONTH_URL,
     suggestJobsForMonthApi
-} from "../../../api/JobMasterApi";
-import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../../api/SoldiersApi";
+} from "../../api/jobMasterApi";
+import {SOLDIERS_JOBS_FOR_MONTH_URL} from "../../api/soldiersApi";
 import {JobCalendarMark} from "./JobCalendarMark";
-import {submitJobsAssignment} from "../../../api/JobsApi";
+import {submitJobsAssignment} from "../../api/jobsApi";
 import {SoldiersListForEdit} from "./SoldiersListForEdit";
-import {useUser} from "../../../providers/UserProvider";
+import {useUser} from "../../providers/Auth/UserProvider";
 import dayjs from "dayjs";
 import {ColorInfo} from "./ColorInfo";
 

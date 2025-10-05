@@ -8,7 +8,7 @@ import {
     ItemMeta,
     ItemName,
     Placeholder
-} from "../CommonStyles";
+} from "../../../theme/commonStyles";
 import {Dropdown} from "@mui/joy";
 
 export function JobMasterSelect({value, options, onChange, placeholder}) {

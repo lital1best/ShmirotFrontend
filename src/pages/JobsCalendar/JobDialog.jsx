@@ -1,8 +1,7 @@
-import {Actions, Button, Card, Field, Form, Input, ItemMeta, ItemName, Label} from "../../theme/commonStyles";
+import {Actions, Button, Card, Field, Form, Input, Label} from "../../theme/commonStyles";
 import React, {useEffect, useState} from "react";
-import {FormControl, InputLabel, MenuItem, Select, Tooltip} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import Modal from '@mui/material/Modal';
-import WarningIcon from '@mui/icons-material/Warning';
 import {createJob, deleteJob, editJob} from "../../api/jobsApi";
 import useSWR from "swr";
 import {
@@ -14,6 +13,7 @@ import {
 import {SelectExemptions} from "../../components/SelectExemptions";
 import {SelectServiceStatus} from "../../components/SelectServiceStatus";
 import {useUser} from "../../providers/Auth/UserProvider";
+import {SoldierRow} from "./SoldierRow";
 
 
 export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMaster, soldiersByScore}) {
@@ -199,23 +199,3 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
 }
 
 export const canSoldierDoJob = (soldier, job) => soldier.serviceStatus === job.serviceStatus && (!job.exemptions.length || !job.exemptions.some(e => soldier.exemptions.includes(e)))
-
-export const SoldierRow = ({soldier, jobConstraints}) => {
-    const soldierConstraint = jobConstraints?.find(c => c.soldierPersonalNumber === soldier.personalNumber);
-
-    return (
-        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-            {soldierConstraint && (
-                <Tooltip title={`Constraint: ${soldierConstraint.reason}`} style={{marginLeft: 'auto'}}>
-                    <WarningIcon color="error" fontSize="small"/>
-                </Tooltip>
-            )}
-
-            <div style={{flexGrow: 1}}>
-                <ItemName>{soldier.firstName} {soldier.lastName}</ItemName>
-                <ItemMeta>Score: {soldier.score} • Rank: {soldier.rank}</ItemMeta>
-            </div>
-        </div>
-    );
-}
-

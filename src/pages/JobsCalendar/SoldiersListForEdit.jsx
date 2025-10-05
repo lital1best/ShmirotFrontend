@@ -1,7 +1,8 @@
-import {canSoldierDoJob, SoldierRow} from "./JobDialog";
+import {canSoldierDoJob} from "./JobDialog";
 import React from "react";
 import {HeaderTitle} from "./MonthlyJobsPage";
 import styled from "styled-components";
+import {SoldierRow} from "./SoldierRow";
 
 export function SoldiersListForEdit({suggestionsMap, selectedJob, soldiersByScore, setSuggestionsMap}) {
     const selectedSoldierPersonalNumber = suggestionsMap[selectedJob.id] ?? soldiersByScore?.find(s => s.personalNumber === selectedJob?.soldier?.personalNumber)?.personalNumber;

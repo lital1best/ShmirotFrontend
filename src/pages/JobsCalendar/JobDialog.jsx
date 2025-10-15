@@ -188,10 +188,10 @@ export function JobDialog({isOpen, onClose, selectedDate, selectedJob, isJobMast
                     {
                         !!selectedJob && !isJobMaster && userConstraint && userConstraint?.id &&
                         <Button type="button" onClick={() => deleteSoldierConstraint(userConstraint.id).then(handleCloseDialog)}>Delete
-                            constrain</Button>
+                            constraint</Button>
                     }
                     { isJobMaster && <Button type="submit" $active>{!!selectedJob ? "Edit job" : "Add a new job"}</Button>}
-                    { !isJobMaster && <Button type="submit" $active> {!!userConstraint? "Edit constrain": "Submit a constrain"} </Button>}
+                    { !isJobMaster && <Button type="submit" $active> {!!userConstraint? "Edit constraint": "Submit a constraint"} </Button>}
                 </Actions>
             </Form>
         </Card>

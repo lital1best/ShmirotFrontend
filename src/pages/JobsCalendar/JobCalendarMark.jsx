@@ -42,6 +42,8 @@ const JobPill = styled.div`
     align-items: center;
     gap: 6px;
     padding: 6px 8px;
+    border: 1px solid var(--army-green-dark);
+    
     ${(props) => props.isAssigned && `
     background: green;
   `}
@@ -50,9 +52,9 @@ const JobPill = styled.div`
     background: brown;
   `}
 
-    ${(props) => (props.hasConstraint) && `
-    background: #cc6600;
-  `}
+    ${(props) => (props.hasConstraint) &&
+            `${props.isAssigned && !props.isJobMaster? 'border-color': 'background'}: #cc6600;` 
+    }
 
     ${(props) => props.isSelected && `
     animation: highlightBorder 2s linear infinite;
@@ -64,7 +66,6 @@ const JobPill = styled.div`
   `}
 
     color: var(--accent-2);
-    border: 1px solid var(--army-green-dark);
     border-radius: 999px;
     font-size: 12px;
     cursor: pointer;

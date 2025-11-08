@@ -65,6 +65,7 @@ export function PersonalDetailsPage({currentTab}) {
                     value={soldier?.unit}
                     onChange={(e) => setSoldier({...soldier, unit: e.target.value})}
                     fullWidth
+                    required
                 />
             </FormRow>
             <FormRow>
